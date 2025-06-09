@@ -5,11 +5,12 @@
 @section('content')
 
 @if(session('error'))
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 @endif
+
 
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -24,9 +25,9 @@
             <div class="card border-0 shadow-lg rounded-3">
                 <div class="card-body px-4 py-4">
 
-                    <h5 class="text-center fw-bold mb-4 border-bottom pb-3">Form Konfirmasi Peserta</h5>
+                    <h5 class="text-center fw-bold mb-4 border-bottom pb-3">Konfirmasi Data Peserta</h5>
 
-                    <form action="{{ route('siswa.cari-ujian') }}" method="POST">
+                    <form action="{{ route('siswa.data-ujian') }}" method="POST">
                         @csrf
 
                         <!-- Data Siswa -->

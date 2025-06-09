@@ -88,10 +88,11 @@ Route::middleware('admin')->group(function () {
 // Siswa 
 Route::middleware('siswa')->group(function () {
     Route::get('/siswa/data-peserta', [SiswaController::class, 'dataPeserta'])->name('siswa.data-peserta');
-    Route::post('/siswa/cari-ujian', [SiswaController::class, 'cariUjian'])->name('siswa.cari-ujian');
+    Route::post('/siswa/data-ujian', [SiswaController::class, 'dataUjian'])->name('siswa.data-ujian');
 
-    Route::get('/ujian/{id_sett_ujian}/mulai', [UjianController::class, 'mulaiUjian'])->name('ujian.mulai');
-    Route::post('/ujian/{id_sett_ujian}/submit', [UjianController::class, 'submitUjian'])->name('ujian.submit');
+    Route::get('/siswa/ujian/{id_sett_ujian}/mulai', [UjianController::class, 'mulaiUjian'])->name('ujian.mulai');
+    Route::post('/siswa/ujian/{id_sett_ujian}/submit', [UjianController::class, 'submitUjian'])->name('ujian.submit');
+    Route::get('/siswa/konfirmasi-ujian', function () {return view('siswa.konfirmasi-ujian');})->name('siswa.konfirmasi-ujian');
 
 
 });

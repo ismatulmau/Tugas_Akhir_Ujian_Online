@@ -255,7 +255,7 @@ class SiswaController extends Controller
     return view('siswa.data-peserta', compact('siswa'));
 }
 
-public function cariUjian(Request $request)
+public function dataUjian(Request $request)
 {
     $request->validate([
         'token' => 'required',
@@ -263,16 +263,30 @@ public function cariUjian(Request $request)
 
     $token = $request->token;
 
-    // Cari token di tabel setting_ujians
     $ujian = SettingUjian::with('bankSoal')->where('token', $token)->first();
 
     if (!$ujian) {
         return redirect()->back()->with('error', 'Token tidak valid!');
     }
 
-    // Tampilkan view form ujian atau redirect ke halaman ujian
-    return view('siswa.data-ujian', compact('ujian'));
+    $id_siswa = Auth::guard('siswa')->user()->id_siswa;
+
+    // Cek apakah siswa sudah mengerjakan ujian ini
+    $sudahMengerjakan = \App\Models\Jawaban::where('id_sett_ujian', $ujian->id_sett_ujian)
+        ->where('id_siswa', $id_siswa)
+        ->exists();
+
+    if ($sudahMengerjakan) {
+        return redirect()->route('siswa.data-peserta')
+            ->with('error', 'Anda sudah mengerjakan ujian ini sebelumnya.');
+    }
+
+    // Jika belum mengerjakan, tampilkan view data ujian
+   session(['ujian_terverifikasi' => $ujian->id_sett_ujian]);
+return view('siswa.data-ujian', compact('ujian'));
 }
+
+
 
 
     

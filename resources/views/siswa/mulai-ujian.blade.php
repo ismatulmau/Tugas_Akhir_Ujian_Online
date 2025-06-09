@@ -133,14 +133,16 @@
     }
 
     @media (max-width: 768px) {
-        .col-md-8, .col-md-4 {
+
+        .col-md-8,
+        .col-md-4 {
             width: 100%;
         }
-        
+
         .d-flex.justify-content-end {
             justify-content: center !important;
         }
-        
+
         .btn {
             margin-bottom: 0.5rem;
             width: 100%;
@@ -150,7 +152,7 @@
 
 @section('content')
 <div class="container mt-2">
-    <div class="row mb-2">
+    <!-- <div class="row mb-2">
         <div class="col-md-12">
             <div class="card bg-light p-1 mb-1">
                 <div class="card-body">
@@ -158,7 +160,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div class="row">
         <div class="col-md-8">
@@ -182,47 +184,50 @@
 
                             @if($soal->gambar_soal)
                             <div class="question-image mb-3">
-                                <img src="{{ asset('storage/' . $soal->gambar_soal) }}" 
-                                     alt="Gambar Soal" 
-                                     class="img-thumbnail">
+                                <img src="{{ asset('storage/soal_images/' . $soal->gambar_soal) }}" alt="Gambar Soal" class="img-fluid">
                             </div>
                             @endif
 
                             <div class="options-container">
                                 @foreach(['A', 'B', 'C', 'D', 'E'] as $opsi)
-                                    @php $opsi_text = 'opsi_' . strtolower($opsi); @endphp
-                                    @if($soal->$opsi_text)
-                                    <div class="form-check option-item">
-                                        <input class="form-check-input" 
-                                               type="radio" 
-                                               name="jawaban[{{ $soal->id_soal }}]" 
-                                               value="{{ $opsi }}" 
-                                               id="soal{{ $soal->id_soal }}_{{ $opsi }}">
-                                        <label class="form-check-label" for="soal{{ $soal->id_soal }}_{{ $opsi }}">
-                                            {{ $opsi }}. {{ $soal->$opsi_text }}
-                                        </label>
-                                    </div>
-                                    @endif
+                                @php $opsi_text = 'opsi_' . strtolower($opsi); @endphp
+                                @if($soal->$opsi_text)
+                                <div class="form-check option-item">
+                                    <input class="form-check-input"
+                                        type="radio"
+                                        name="jawaban[{{ $soal->id_soal }}]"
+                                        value="{{ $opsi }}"
+                                        id="soal{{ $soal->id_soal }}_{{ $opsi }}">
+                                    <label class="form-check-label" for="soal{{ $soal->id_soal }}_{{ $opsi }}">
+                                        {{ $opsi }}. {{ $soal->$opsi_text }}
+                                    </label>
+                                </div>
+                                @endif
                                 @endforeach
                             </div>
 
-                            <div class="question-actions d-flex justify-content-end mt-4">
-                                <button type="button" class="btn btn-warning ragu-question mr-2">Ragu-ragu</button>
-                                @if($index < count($soals) - 1)
-                                    <button type="button" class="btn btn-outline-primary skip-question mr-2">Lewati</button>
-                                    <button type="button" class="btn btn-primary next-question">Selanjutnya</button>
+                            <div class="question-actions d-flex justify-content-between mt-4">
+                                @if($index > 0)
+                                <button type="button" class="btn btn-outline-primary prev-question">Sebelumnya</button>
                                 @else
-                                    <button type="submit" class="btn btn-success" id="submit-button">Simpan Jawaban</button>
+                                <div></div>
                                 @endif
+
+                                <button type="button" class="btn btn-warning ragu-question">Ragu-ragu</button>
+
+                                @if($index < count($soals) - 1)
+                                    <button type="button" class="btn btn-primary next-question">Selanjutnya</button>
+                                    @else
+                                    <button type="submit" class="btn btn-success" id="submit-button">Simpan Jawaban</button>
+                                    @endif
                             </div>
+
                         </div>
                     </div>
                     @endforeach
                 </div>
 
-                <div class="form-submit d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-success" id="final-submit-button" style="display: none;">Simpan Jawaban</button>
-                </div>
+
             </form>
         </div>
 
@@ -234,9 +239,9 @@
                 <div class="card-body">
                     <div class="questions-navigation d-flex flex-wrap">
                         @foreach($soals as $index => $soal)
-                        <button type="button" 
-                                class="btn btn-outline-primary question-nav m-1" 
-                                data-index="{{ $index }}">
+                        <button type="button"
+                            class="btn btn-outline-primary question-nav m-1"
+                            data-index="{{ $index }}">
                             {{ $index + 1 }}
                         </button>
                         @endforeach
@@ -249,174 +254,168 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Elemen DOM
-    const questions = document.querySelectorAll('.question');
-    const nextButtons = document.querySelectorAll('.next-question');
-    const skipButtons = document.querySelectorAll('.skip-question');
-    const raguButtons = document.querySelectorAll('.ragu-question');
-    const navButtons = document.querySelectorAll('.question-nav');
-    const form = document.getElementById('exam-form');
-    const finalSubmitButton = document.getElementById('final-submit-button');
-    const timerElements = document.querySelectorAll('[id^="time-remaining-"]');
-    
-    // Durasi ujian
-    const examDurationMinutes = {{ $ujian->durasi }};
-    const examDurationMillis = examDurationMinutes * 60 * 1000;
-    
-    // Timer management
-    let examStartTime = localStorage.getItem('examStartTime');
-    if (!examStartTime) {
-        examStartTime = new Date().getTime();
-        localStorage.setItem('examStartTime', examStartTime);
-    }
-    
-    const examEndTime = parseInt(examStartTime) + examDurationMillis;
-    let timerInterval;
-    
-    // Fungsi update timer
-    function updateTimer() {
-        const now = new Date().getTime();
-        const distance = examEndTime - now;
-        
-        if (distance < 0) {
-            clearInterval(timerInterval);
-            Swal.fire({
-                title: 'Waktu Habis!',
-                text: "Waktu ujian Anda telah habis. Jawaban Anda akan disimpan secara otomatis.",
-                icon: 'info',
-                confirmButtonText: 'Oke'
-            }).then(() => {
-                localStorage.removeItem('examStartTime');
-                form.submit();
-            });
-            return;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elemen DOM
+        const questions = document.querySelectorAll('.question');
+        const nextButtons = document.querySelectorAll('.next-question');
+        const skipButtons = document.querySelectorAll('.prev-question');
+        const raguButtons = document.querySelectorAll('.ragu-question');
+        const navButtons = document.querySelectorAll('.question-nav');
+        const form = document.getElementById('exam-form');
+        const timerElements = document.querySelectorAll('[id^="time-remaining-"]');
+
+        // Durasi ujian
+        const examDurationMinutes = {{ $ujian->durasi }};
+
+        const examDurationMillis = examDurationMinutes * 60 * 1000;
+
+        // Timer management
+        let examStartTime = localStorage.getItem('examStartTime');
+        if (!examStartTime) {
+            examStartTime = new Date().getTime();
+            localStorage.setItem('examStartTime', examStartTime);
         }
-        
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        
-        timerElements.forEach(timerElement => {
-            timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        });
-    }
-    
-    // Inisialisasi timer
-    updateTimer();
-    timerInterval = setInterval(updateTimer, 1000);
-    
-    // Navigasi soal
-    function showQuestion(index) {
-        questions.forEach((question, i) => {
-            question.style.display = i === index ? 'block' : 'none';
-        });
-        
-        // Update tombol submit
-        finalSubmitButton.style.display = index === questions.length - 1 ? 'block' : 'none';
-        
-        // Update status navigasi
-        navButtons.forEach((btn, i) => {
-            btn.classList.toggle('active', i === index);
-        });
-    }
-    
-    // Event listeners untuk tombol navigasi
-    navButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const index = parseInt(this.getAttribute('data-index'));
-            showQuestion(index);
-        });
-    });
-    
-    // Tombol selanjutnya
-    nextButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const currentQuestion = this.closest('.question');
-            const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
-            showQuestion(currentIndex + 1);
-        });
-    });
-    
-    // Tombol lewati
-    skipButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const currentQuestion = this.closest('.question');
-            const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
-            showQuestion(currentIndex + 1);
-        });
-    });
-    
-    // Tombol ragu-ragu
-    raguButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const currentQuestion = this.closest('.question');
-            const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
-            
-            // Toggle status ragu-ragu
-            const navButton = navButtons[currentIndex];
-            navButton.classList.toggle('btn-warning');
-            navButton.classList.toggle('btn-outline-primary');
-            
-            // Beri feedback
-            this.classList.add('btn-outline-warning');
-            this.textContent = 'Ragu!';
-            setTimeout(() => {
-                this.classList.remove('btn-outline-warning');
-                this.textContent = 'Ragu-ragu';
-            }, 1000);
-        });
-    });
-    
-    // Update status jawaban di navigasi
-    form.addEventListener('change', function(e) {
-        if (e.target.matches('.form-check-input')) {
-            const questionId = e.target.closest('.question').id;
-            const questionIndex = parseInt(questionId.split('-')[1]);
-            const navButton = navButtons[questionIndex];
-            
-            // Cek apakah ada jawaban yang dipilih
-            const inputs = document.querySelectorAll(`#${questionId} .form-check-input`);
-            let answered = false;
-            inputs.forEach(input => {
-                if (input.checked) answered = true;
+
+        const examEndTime = parseInt(examStartTime) + examDurationMillis;
+        let timerInterval;
+
+        // Fungsi update timer
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = examEndTime - now;
+
+            if (distance < 0) {
+                clearInterval(timerInterval);
+                Swal.fire({
+                    title: 'Waktu Habis!',
+                    text: "Waktu ujian Anda telah habis. Jawaban Anda akan disimpan secara otomatis.",
+                    icon: 'info',
+                    confirmButtonText: 'Oke'
+                }).then(() => {
+                    localStorage.removeItem('examStartTime');
+                    form.submit();
+                });
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            timerElements.forEach(timerElement => {
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             });
-            
-            // Update tampilan navigasi
-            if (answered) {
-                navButton.classList.add('btn-primary');
-                navButton.classList.remove('btn-outline-primary', 'btn-warning');
-            }
         }
+
+        // Inisialisasi timer
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+
+        // Navigasi soal
+        function showQuestion(index) {
+            questions.forEach((question, i) => {
+                question.style.display = i === index ? 'block' : 'none';
+            });
+
+            // Update tombol submit
+            // finalSubmitButton.style.display = index === questions.length - 1 ? 'block' : 'none';
+
+            // Update status navigasi
+            navButtons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+        }
+
+        // Event listeners untuk tombol navigasi
+        navButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+        showQuestion(index);
     });
-    
-    // Konfirmasi submit
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Hitung jumlah soal yang dijawab
-        const answeredQuestions = document.querySelectorAll('.form-check-input:checked').length;
-        const totalQuestions = document.querySelectorAll('.form-check-input').length / 5; // Asumsi 5 opsi per soal
-        
-        Swal.fire({
-            title: 'Konfirmasi',
-            html: `Anda telah menjawab ${answeredQuestions} dari ${totalQuestions} soal.<br>Apakah Anda yakin ingin menyimpan jawaban?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#dc3545',
-            confirmButtonText: 'Ya, Simpan!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                localStorage.removeItem('examStartTime');
-                form.submit();
-            }
-        });
-    });
-    
-    // Inisialisasi status navigasi awal
-    showQuestion(0);
 });
+
+
+        // Tombol selanjutnya
+        nextButtons.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+        showQuestion(index + 1);
+    });
+});
+
+document.querySelectorAll('.prev-question').forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+        showQuestion(index);
+    });
+});
+
+
+        // Tombol ragu-ragu
+        raguButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const currentQuestion = this.closest('.question');
+                const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
+
+                // Toggle status ragu-ragu
+                const navButton = navButtons[currentIndex];
+                navButton.classList.toggle('btn-warning');
+                navButton.classList.toggle('btn-outline-primary');
+
+                // Beri feedback
+                this.classList.add('btn-outline-warning');
+                this.textContent = 'Ragu!';
+                setTimeout(() => {
+                    this.classList.remove('btn-outline-warning');
+                    this.textContent = 'Ragu-ragu';
+                }, 1000);
+            });
+        });
+
+        // Update status jawaban di navigasi
+        form.addEventListener('change', function(e) {
+            if (e.target.matches('.form-check-input')) {
+                const questionId = e.target.closest('.question').id;
+                const questionIndex = parseInt(questionId.split('-')[1]);
+                const navButton = navButtons[questionIndex];
+
+                // Cek apakah ada jawaban yang dipilih
+                const inputs = document.querySelectorAll(`#${questionId} .form-check-input`);
+                let answered = false;
+                inputs.forEach(input => {
+                    if (input.checked) answered = true;
+                });
+
+                // Update tampilan navigasi
+                if (answered) {
+                    navButton.classList.add('btn-primary');
+                    navButton.classList.remove('btn-outline-primary', 'btn-warning');
+                }
+            }
+        });
+
+        // Konfirmasi submit
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+
+
+            Swal.fire({
+                title: 'Konfirmasi',
+                html: `Apakah Anda yakin ingin menyimpan jawaban?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#dc3545',
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('examStartTime');
+                    form.submit();
+                }
+            });
+        });
+
+        // Inisialisasi status navigasi awal
+        showQuestion(0);
+    });
 </script>
 @endsection
