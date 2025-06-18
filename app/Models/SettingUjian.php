@@ -27,4 +27,10 @@ class SettingUjian extends Model
     return $this->belongsTo(BankSoal::class, 'id_bank_soal', 'id_bank_soal');
 }
 
+public function jawaban()
+{
+    return $this->hasMany(Jawaban::class, 'id_sett_ujian', 'id_sett_ujian');
+}
+
+
 }

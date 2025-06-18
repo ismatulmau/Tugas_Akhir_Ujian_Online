@@ -12,6 +12,7 @@ use App\Models\SettingUjian;
 use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\SiswaTemplateExport;
 
 class SiswaController extends Controller
 {
@@ -156,6 +157,11 @@ class SiswaController extends Controller
         return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus.');
     }
 
+    public function downloadTemplate()
+{
+    return Excel::download(new SiswaTemplateExport, 'Template_Import_Siswa.xlsx');
+}
+
     public function import(Request $request)
     {
         $request->validate([
@@ -270,16 +276,6 @@ public function dataUjian(Request $request)
     }
 
     $id_siswa = Auth::guard('siswa')->user()->id_siswa;
-
-    // Cek apakah siswa sudah mengerjakan ujian ini
-    $sudahMengerjakan = \App\Models\Jawaban::where('id_sett_ujian', $ujian->id_sett_ujian)
-        ->where('id_siswa', $id_siswa)
-        ->exists();
-
-    if ($sudahMengerjakan) {
-        return redirect()->route('siswa.data-peserta')
-            ->with('error', 'Anda sudah mengerjakan ujian ini sebelumnya.');
-    }
 
     // Jika belum mengerjakan, tampilkan view data ujian
    session(['ujian_terverifikasi' => $ujian->id_sett_ujian]);

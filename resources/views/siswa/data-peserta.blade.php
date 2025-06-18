@@ -57,7 +57,7 @@
 
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary fw-semibold">
-                                <i class="fas fa-sign-in-alt me-2"></i>Mulai Ujian
+                                <i class="fas fa-sign-in-alt me-2"></i>Sumbit
                             </button>
                         </div>
                     </form>

@@ -47,6 +47,10 @@ $masihBisaUjian = $sekarang->lte($waktuSelesai);
                                     <input type="text" class="form-control bg-light" value="{{ $ujian->bankSoal->mapel->nama_mapel ?? '-' }}" readonly>
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Kelas</label>
+                                    <input type="text" class="form-control bg-light" value="{{ $ujian->bankSoal->level ?? '-' }} ({{ $ujian->bankSoal->jurusan ?? '-' }})" readonly>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold">Jenis Tes</label>
                                     <input type="text" class="form-control bg-light" value="{{ $ujian->jenis_tes }}" readonly>
                                 </div>

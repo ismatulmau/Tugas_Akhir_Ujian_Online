@@ -73,17 +73,18 @@
                     <div class="collapse {{ request()->is('status-ujian*') ? 'show' : '' }}" id="forms">
                         <ul class="nav nav-collapse">
                             <li class="nav-item {{ request()->routeIs('setting-ujian.index') ? 'active' : '' }}">
-                                <a href="{{ route('setting-ujian.index') }}" class="nav-link"><span class="sub-item">Setting Ujian</span></a>
+                                <a href="{{ route('setting-ujian.index') }}" class="nav-link"><span class="sub-item">Kelola Ujian</span></a>
                             </li>
                             <li class="nav-item {{ request()->routeIs('jadwal.ujian') ? 'active' : '' }}">
                                 <a href="{{ route('jadwal.ujian') }}" class="nav-link"><span class="sub-item">Jadwal Ujian</span></a>
                             </li>
+                            
                         </ul>
                     </div>
                 </li>
 
-                <li class="nav-item">
-                    <a data-bs-toggle="collapse" href="#tables">
+<li class="nav-item {{ request()->routeIs('rekap.nilai.index') ? 'active' : '' }}">
+                    <a href="{{ route('rekap.nilai.index') }}" class="nav-link">
                         <i class="fas fa-table"></i>
                         <p>Rekap Nilai</p>
                     </a>

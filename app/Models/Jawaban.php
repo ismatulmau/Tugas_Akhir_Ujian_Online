@@ -21,25 +21,14 @@ class Jawaban extends Model
         'jawaban',
     ];
 
-    /**
-     * Relasi ke SettingUjian
-     */
     public function settingUjian()
     {
         return $this->belongsTo(SettingUjian::class, 'id_sett_ujian', 'id_sett_ujian');
     }
-
-    /**
-     * Relasi ke Siswa
-     */
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'id_siswa', 'id_siswa');
     }
-
-    /**
-     * Relasi ke Soal
-     */
     public function soal()
     {
         return $this->belongsTo(Soal::class, 'id_soal', 'id_soal');

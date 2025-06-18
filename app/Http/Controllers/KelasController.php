@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Imports\KelasImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\KelasTemplateExport;
 use Illuminate\Http\Request;
 use App\Models\Kelas;
 
@@ -85,6 +86,11 @@ class KelasController extends Controller
 
         return redirect()->route('kelas.index')->with('success', 'Data kelas berhasil dihapus.');
     }
+
+    public function downloadTemplate()
+{
+    return Excel::download(new KelasTemplateExport, 'Template_Import_Kelas.xlsx');
+}
 
     public function import(Request $request)
 {

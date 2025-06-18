@@ -23,9 +23,6 @@ class Soal extends Model
         'jawaban_benar',
     ];
 
-    /**
-     * Relasi: Satu soal dimiliki oleh satu bank soal
-     */
     public function bankSoal()
     {
         return $this->belongsTo(BankSoal::class, 'id_bank_soal');

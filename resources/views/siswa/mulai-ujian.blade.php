@@ -152,15 +152,6 @@
 
 @section('content')
 <div class="container mt-2">
-    <!-- <div class="row mb-2">
-        <div class="col-md-12">
-            <div class="card bg-light p-1 mb-1">
-                <div class="card-body">
-                    <p class="mb-1"><strong>Ujian:</strong> {{ $ujian->bankSoal->nama_bank_soal }}</p>
-                </div>
-            </div>
-        </div>
-    </div> -->
 
     <div class="row">
         <div class="col-md-8">
@@ -184,7 +175,7 @@
 
                             @if($soal->gambar_soal)
                             <div class="question-image mb-3">
-                                <img src="{{ asset('storage/soal_images/' . $soal->gambar_soal) }}" alt="Gambar Soal" class="img-fluid">
+                                <img src="{{ asset('storage/' . $soal->gambar_soal) }}" alt="Gambar Soal" class="img-fluid">
                             </div>
                             @endif
 
@@ -254,8 +245,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const examEndTime = new Date("{{ \Carbon\Carbon::parse($ujian->waktu_selesai)->format('Y-m-d H:i:s') }}").getTime();
+</script>
+
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Elemen DOM
         const questions = document.querySelectorAll('.question');
         const nextButtons = document.querySelectorAll('.next-question');
         const skipButtons = document.querySelectorAll('.prev-question');
@@ -264,22 +258,18 @@
         const form = document.getElementById('exam-form');
         const timerElements = document.querySelectorAll('[id^="time-remaining-"]');
 
-        // Durasi ujian
         const examDurationMinutes = {{ $ujian->durasi }};
-
         const examDurationMillis = examDurationMinutes * 60 * 1000;
 
-        // Timer management
-        let examStartTime = localStorage.getItem('examStartTime');
-        if (!examStartTime) {
-            examStartTime = new Date().getTime();
-            localStorage.setItem('examStartTime', examStartTime);
-        }
+        // Timer
+            // let examStartTime = localStorage.getItem('examStartTime');
+            // if (!examStartTime) {
+            //     examStartTime = new Date().getTime();
+            //     localStorage.setItem('examStartTime', examStartTime);
+            // }
+            // const examEndTime = parseInt(examStartTime) + examDurationMillis;
+            // let timerInterval;
 
-        const examEndTime = parseInt(examStartTime) + examDurationMillis;
-        let timerInterval;
-
-        // Fungsi update timer
         function updateTimer() {
             const now = new Date().getTime();
             const distance = examEndTime - now;
@@ -292,7 +282,7 @@
                     icon: 'info',
                     confirmButtonText: 'Oke'
                 }).then(() => {
-                    localStorage.removeItem('examStartTime');
+                    clearExamStorage();
                     form.submit();
                 });
                 return;
@@ -307,59 +297,47 @@
             });
         }
 
-        // Inisialisasi timer
         updateTimer();
         timerInterval = setInterval(updateTimer, 1000);
 
-        // Navigasi soal
         function showQuestion(index) {
             questions.forEach((question, i) => {
                 question.style.display = i === index ? 'block' : 'none';
             });
 
-            // Update tombol submit
-            // finalSubmitButton.style.display = index === questions.length - 1 ? 'block' : 'none';
-
-            // Update status navigasi
             navButtons.forEach((btn, i) => {
                 btn.classList.toggle('active', i === index);
             });
+
+            localStorage.setItem('lastQuestionIndex', index);
         }
 
-        // Event listeners untuk tombol navigasi
+        // Kembalikan posisi terakhir
+        let lastIndex = parseInt(localStorage.getItem('lastQuestionIndex')) || 0;
+        showQuestion(lastIndex);
+
         navButtons.forEach((btn, index) => {
-    btn.addEventListener('click', () => {
-        showQuestion(index);
-    });
-});
+            btn.addEventListener('click', () => showQuestion(index));
+        });
 
-
-        // Tombol selanjutnya
         nextButtons.forEach((btn, index) => {
-    btn.addEventListener('click', () => {
-        showQuestion(index + 1);
-    });
-});
+            btn.addEventListener('click', () => showQuestion(index + 1));
+        });
 
-document.querySelectorAll('.prev-question').forEach((btn, index) => {
-    btn.addEventListener('click', () => {
-        showQuestion(index);
-    });
-});
+        skipButtons.forEach((btn, index) => {
+            btn.addEventListener('click', () => showQuestion(index));
+        });
 
-
-        // Tombol ragu-ragu
+        // Ragu-ragu
         raguButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const currentQuestion = this.closest('.question');
                 const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
-
-                // Toggle status ragu-ragu
                 const navButton = navButtons[currentIndex];
+
                 navButton.classList.toggle('btn-warning');
                 navButton.classList.toggle('btn-outline-primary');
 
-                // Beri feedback
                 this.classList.add('btn-outline-warning');
                 this.textContent = 'Ragu!';
                 setTimeout(() => {
@@ -369,33 +347,47 @@ document.querySelectorAll('.prev-question').forEach((btn, index) => {
             });
         });
 
-        // Update status jawaban di navigasi
+        // Simpan jawaban ke localStorage
         form.addEventListener('change', function(e) {
             if (e.target.matches('.form-check-input')) {
+                const soalId = e.target.name.match(/\[(\d+)\]/)[1];
+                localStorage.setItem(`jawaban_${soalId}`, e.target.value);
+
                 const questionId = e.target.closest('.question').id;
                 const questionIndex = parseInt(questionId.split('-')[1]);
                 const navButton = navButtons[questionIndex];
 
-                // Cek apakah ada jawaban yang dipilih
-                const inputs = document.querySelectorAll(`#${questionId} .form-check-input`);
-                let answered = false;
-                inputs.forEach(input => {
-                    if (input.checked) answered = true;
-                });
-
-                // Update tampilan navigasi
-                if (answered) {
-                    navButton.classList.add('btn-primary');
-                    navButton.classList.remove('btn-outline-primary', 'btn-warning');
-                }
+                navButton.classList.add('btn-primary');
+                navButton.classList.remove('btn-outline-primary', 'btn-warning');
             }
         });
 
-        // Konfirmasi submit
+        // Pulihkan jawaban dari localStorage saat halaman dimuat
+        document.querySelectorAll('.form-check-input').forEach(input => {
+            const soalId = input.name.match(/\[(\d+)\]/)[1];
+            const savedAnswer = localStorage.getItem(`jawaban_${soalId}`);
+            if (savedAnswer && input.value === savedAnswer) {
+                input.checked = true;
+
+                const questionIndex = parseInt(input.closest('.question').id.split('-')[1]);
+                const navButton = document.querySelector(`.question-nav[data-index="${questionIndex}"]`);
+                navButton.classList.add('btn-primary');
+                navButton.classList.remove('btn-outline-primary', 'btn-warning');
+            }
+        });
+
+        function clearExamStorage() {
+            // localStorage.removeItem('examStartTime');
+            localStorage.removeItem('lastQuestionIndex');
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('jawaban_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+        }
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-
-
 
             Swal.fire({
                 title: 'Konfirmasi',
@@ -408,14 +400,12 @@ document.querySelectorAll('.prev-question').forEach((btn, index) => {
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    localStorage.removeItem('examStartTime');
+                    clearExamStorage();
                     form.submit();
                 }
             });
         });
-
-        // Inisialisasi status navigasi awal
-        showQuestion(0);
     });
 </script>
+
 @endsection

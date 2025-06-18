@@ -209,7 +209,7 @@
           <div class="alert alert-info">
             <strong>Petunjuk:</strong>
             <ul class="mb-0">
-              <li>Download template <a href="{{ asset('templates/template_import_kelas.xlsx') }}">disini</a></li>
+              <li>Download template <a href="{{ route('kelas.downloadTemplate') }}">disini</a></li>
               <li>Isi data sesuai format</li>
               <li>Format file excel TIDAK BOLEH dirubah</li>
             </ul>

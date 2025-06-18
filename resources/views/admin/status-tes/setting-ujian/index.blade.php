@@ -2,11 +2,11 @@
 
 @section('page-header')
 <div class="page-header">
-  <h4 class="page-title">Setting Ujian</h4>
+  <h4 class="page-title">Status Ujian</h4>
   <ul class="breadcrumbs">
     <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
     <li class="separator"><i class="icon-arrow-right"></i></li>
-    <li class="nav-item"><a href="#">Setting Ujian</a></li>
+    <li class="nav-item"><a href="{{ route('setting-ujian.index') }}">Setting Ujian</a></li>
   </ul>
 </div>
 @endsection
@@ -59,13 +59,14 @@
             <th>Waktu Selesai</th>
             <th>Durasi</th>
             <th>Sesi</th>
+            <th>Tes</th>
             <th>Token</th>
             <th>Status</th>
             <th>Jadwal</th>
           </tr>
         </thead>
         <tbody>
-          @forelse($banksoalsAktif->where('status', 'aktif') as $index => $banksoal)
+          @forelse($banksoals as $index => $banksoal)
           @php $setting = $banksoal->settingUjian; @endphp
           <tr>
             <td>{{ $index + 1 }}</td>
@@ -83,19 +84,25 @@
             <td>{{ $setting?->waktu_selesai ?? '-' }}</td>
             <td>{{ $setting?->durasi ? $setting->durasi . ' menit' : '-' }}</td>
             <td>{{ $setting?->sesi ?? '-' }}</td>
+            <td>{{ $setting?->jenis_tes ?? '-' }}</td>
             <td>{{ $setting?->token ?? '-' }}</td>
 
             {{-- Status --}}
             <td>
               @if($setting)
-              <button type="button" class="btn btn-sm btn-outline-success w-100" disabled>
-                Aktif
-              </button>
-              @else
-              <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
-                <i class="fa fa-times-circle me-1"></i> Nonaktif
-              </button>
-              @endif
+    @if($setting->status === 'aktif')
+        <button type="button" class="btn btn-sm btn-outline-success w-100" disabled>
+            Aktif
+        </button>
+    @else
+        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
+            Nonaktif
+        </button>
+    @endif
+@else
+    <span class="badge bg-danger">Belum disetting</span>
+@endif
+
             </td>
             {{-- Tombol Setting --}}
             <td>
@@ -184,10 +191,11 @@
       <div class="mt-4 alert alert-warning" role="alert">
         <h6 class="fw-bold">Catatan Penting:</h6>
         <ul class="mb-0">
+          <li>Jika ingin berganti <strong>Sesi Ujian</strong>, silahkan <strong>nonAktifkan</strong> terlebih dahulu Bank Soal, kemudian <strong>Aktifkan</strong> kembali dan atur ulang jadwalnya.</li>
           <li>Beberapa ujian (untuk level dan jurusan berbeda) bisa diatur dalam waktu bersamaan.</li>
           <li>Apabila satu level memiliki beberapa ujian bersamaan (untuk level dan jurusan yang sama), maka peserta <strong>tidak dapat mengikuti ujian</strong> (*terlambat mengikuti ujian).</li>
           <li>Daftar di atas merupakan paket ujian yang telah <strong>diaktifkan oleh admin</strong>. Silakan melakukan pengaturan daftar ujian dengan mengklik tombol <strong>‘Set’</strong> pada menu jadwal.</li>
-          <li>Untuk menghapus paket ujian, silakan <strong>NonAktifkan</strong> terlebih dahulu di menu <strong>Bank Soal</strong>.</li>
+          <li>Jika ingin berganti sesi, silahkan atur ulang dengan mengedit jadwalnya.</li>
         </ul>
       </div>
     </div>
@@ -195,7 +203,7 @@
 </div>
 
 {{-- Modal Ditaruh Di Luar Tabel --}}
-@foreach($banksoalsAktif->where('status', 'aktif') as $banksoal)
+@forelse($banksoals as $index => $banksoal)
 <!-- Modal Setting Ujian -->
 <div class="modal fade" id="modalSettingUjian{{ $banksoal->id_bank_soal }}" tabindex="-1" aria-labelledby="modalSettingLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">

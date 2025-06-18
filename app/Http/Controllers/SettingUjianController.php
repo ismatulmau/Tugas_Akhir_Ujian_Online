@@ -9,11 +9,16 @@ use Illuminate\Http\Request;
 class SettingUjianController extends Controller
 {
     public function index()
-    {
-        $banksoalsAktif = BankSoal::where('status', 'aktif')->get();
+{
+    $banksoals = BankSoal::with(['mapel', 'soals', 'settingUjian' => function ($query) {
+        $query->where('status', 'aktif');
+    }])
+    ->where('status', 'aktif') // hanya bank soal aktif
+    ->get();
 
-        return view('admin.status-tes.setting-ujian.index', compact('banksoalsAktif'));
-    }
+    return view('admin.status-tes.setting-ujian.index', compact('banksoals'));
+}
+
 
     public function store(Request $request)
 {
@@ -69,6 +74,8 @@ class SettingUjianController extends Controller
 
         $setting = SettingUjian::findOrFail($id_sett_ujian);
 
+        $durasi = (strtotime($request->waktu_selesai) - strtotime($request->waktu_mulai)) / 60;
+
         $setting->update([
             'jenis_tes' => $request->jenis_tes,
             'semester' => $request->semester,
@@ -76,6 +83,7 @@ class SettingUjianController extends Controller
             'token' => $request->token,
             'waktu_mulai' => $request->waktu_mulai,
             'waktu_selesai' => $request->waktu_selesai,
+            'durasi' => $durasi,
         ]);
 
         return redirect()->back()->with('success', 'Setting ujian berhasil diperbarui.');
@@ -83,14 +91,27 @@ class SettingUjianController extends Controller
 
 
     public function jadwalUjian()
-    {
-        $jadwals = SettingUjian::with(['bankSoal.mapel'])
-            ->whereHas('bankSoal', function ($query) {
-                $query->where('status', 'aktif');
-            })
-            ->latest()
-            ->get();
+{
+    $jadwals = SettingUjian::with(['bankSoal.mapel'])
+        ->where('status', 'aktif') // hanya tampilkan setting ujian yang aktif
+        ->whereHas('bankSoal', function ($query) {
+            $query->where('status', 'aktif'); // dan bank soal juga harus aktif
+        })
+        ->latest()
+        ->get();
 
-        return view('admin.status-tes.setting-ujian.jadwal-ujian', compact('jadwals'));
-    }
+    return view('admin.status-tes.setting-ujian.jadwal-ujian', compact('jadwals'));
+}
+
+
+//     public function historiUjian()
+// {
+//     $jadwals = SettingUjian::with(['bankSoal.mapel'])
+//         ->where('status', 'nonaktif')
+//         ->latest()
+//         ->get();
+
+//     return view('admin.status-tes.setting-ujian.histori-ujian', compact('jadwals'));
+// }
+
 }

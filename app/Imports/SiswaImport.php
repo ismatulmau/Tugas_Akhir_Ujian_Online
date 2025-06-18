@@ -18,7 +18,6 @@ class SiswaImport implements ToModel, WithHeadingRow
                     'level' => $row['level'],
                     'jurusan' => $row['jurusan'],
                     'kode_kelas' => $row['kode_kelas'],
-                    'jenis_ujian' => $row['jenis_ujian'],
                     'nomor_induk' => $row['nomor_induk'],
                     'gambar' => $row['gambar'],
                     'password' => Hash::make($row['password']),

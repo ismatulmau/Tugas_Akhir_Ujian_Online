@@ -158,16 +158,18 @@ public function toggleStatus($id_bank_soal)
 
         return back()->with('success', 'Bank soal berhasil diaktifkan.');
     } else {
-        // Nonaktifkan
-        $banksoal->status = 'nonaktif';
-        $banksoal->save();
+    // Nonaktifkan bank soal
+    $banksoal->status = 'nonaktif';
+    $banksoal->save();
 
-        if ($banksoal->settingUjian) {
-            $banksoal->settingUjian->delete();
-        }
+    // Ubah status setting ujian terkait menjadi nonaktif
+    if ($banksoal->settingUjian) {
+    $banksoal->settingUjian->status = 'nonaktif'; // ubah status setting jadi nonaktif
+    $banksoal->settingUjian->save();
+}
 
-        return back()->with('success', 'Bank soal dinonaktifkan dan setting ujian terkait dihapus.');
-    }
+    return back()->with('success', 'Bank soal dinonaktifkan dan setting ujian di-nonaktifkan.');
+}
 }
 
 

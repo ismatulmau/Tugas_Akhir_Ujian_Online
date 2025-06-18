@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Mapel;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MapelImport;
+use App\Exports\MapelTemplateExport;
 
 class MataPelajaranController extends Controller
 {
@@ -82,6 +83,11 @@ class MataPelajaranController extends Controller
 
         return redirect()->route('mapel.index')->with('success', 'Data mata pelajaran berhasil dihapus.');
     }
+
+    public function downloadTemplate()
+{
+    return Excel::download(new MapelTemplateExport, 'Template_Import_Mapel.xlsx');
+}
 
     public function import(Request $request)
 {

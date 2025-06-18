@@ -2,7 +2,7 @@
 
 @section('page-header')
 <div class="page-header">
-    <h4 class="page-title">Jadwal Ujian</h4>
+    <h4 class="page-title">Status Ujian</h4>
     <ul class="breadcrumbs">
         <li class="nav-home"><a href="{{ route('admin.dashboard') }}"><i class="icon-home"></i></a></li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
@@ -13,26 +13,29 @@
 
 @section('content')
 
-<div class="container">
-    <h4 class="mb-4">Jadwal Ujian</h4>
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>No</th>
-                    <th>Bank Soal</th>
-                    <th>Mata Pelajaran</th>
-                    <th>Jenis Tes</th>
-                    <th>Semester</th>
-                    <th>Sesi</th>
-                    <th>Waktu Mulai</th>
-                    <th>Waktu Selesai</th>
-                    <th>Durasi</th>
-                    <th>Token</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($jadwals as $index => $jadwal)
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="card-title mb-0">Ujian Berlangsung</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Bank Soal</th>
+                        <th>Mata Pelajaran</th>
+                        <th>Jenis Tes</th>
+                        <th>Semester</th>
+                        <th>Sesi</th>
+                        <th>Waktu Mulai</th>
+                        <th>Waktu Selesai</th>
+                        <th>Durasi</th>
+                        <th>Token</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($jadwals as $index => $jadwal)
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $jadwal->bankSoal->nama_bank_soal ?? '-' }}</td>
@@ -40,18 +43,19 @@
                         <td>{{ ucfirst($jadwal->jenis_tes) }}</td>
                         <td>{{ $jadwal->semester }}</td>
                         <td>{{ $jadwal->sesi }}</td>
-                        <td>{{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('d M Y H:i:s') }}</td>
-                        <td>{{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('d M Y H:i:s') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('d M Y H:i') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('d M Y H:i') }}</td>
                         <td>{{ $jadwal->durasi }} menit</td>
                         <td><span class="badge bg-primary">{{ $jadwal->token }}</span></td>
                     </tr>
-                @empty
+                    @empty
                     <tr>
-                        <td colspan="10" class="text-center">Belum ada jadwal ujian yang disetting.</td>
+                        <td colspan="11" class="text-center">Belum ada jadwal ujian yang disetting.</td>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endsection

@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Models\BankSoal;
 use App\Models\Soal;
+use App\Exports\SoalTemplateExport;
 
 use Illuminate\Http\Request;
 
@@ -132,12 +133,17 @@ class SoalController extends Controller
         $soal->delete();
 
         // Cek apakah jumlah soal sekarang 0
-    if ($bankSoal->soals()->count() == 0) {
-        $bankSoal->status = 'nonaktif';
-        $bankSoal->save();
-    }
+        if ($bankSoal->soals()->count() == 0) {
+            $bankSoal->status = 'nonaktif';
+            $bankSoal->save();
+        }
 
         return redirect()->back()->with('success', 'Soal berhasil dihapus.');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new SoalTemplateExport, 'Template_Import_Soal.xlsx');
     }
 
     public function import(Request $request)
@@ -197,20 +203,20 @@ class SoalController extends Controller
     }
 
     public function kosongkan($id_bank_soal)
-{
-    // Ambil semua soal berdasarkan id_bank_soal
-    $soals = Soal::where('id_bank_soal', $id_bank_soal)->get();
+    {
+        // Ambil semua soal berdasarkan id_bank_soal
+        $soals = Soal::where('id_bank_soal', $id_bank_soal)->get();
 
-    // Hapus file gambar jika ada
-    foreach ($soals as $soal) {
-        if ($soal->gambar_soal && Storage::exists($soal->gambar_soal)) {
-            Storage::delete($soal->gambar_soal);
+        // Hapus file gambar jika ada
+        foreach ($soals as $soal) {
+            if ($soal->gambar_soal && Storage::exists($soal->gambar_soal)) {
+                Storage::delete($soal->gambar_soal);
+            }
         }
+
+        // Hapus semua soal
+        Soal::where('id_bank_soal', $id_bank_soal)->delete();
+
+        return redirect()->back()->with('success', 'Semua soal berhasil dihapus.');
     }
-
-    // Hapus semua soal
-    Soal::where('id_bank_soal', $id_bank_soal)->delete();
-
-    return redirect()->back()->with('success', 'Semua soal berhasil dihapus.');
-}
 }

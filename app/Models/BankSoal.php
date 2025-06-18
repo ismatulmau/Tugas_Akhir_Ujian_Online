@@ -45,4 +45,11 @@ public function settingUjian()
     return $this->hasOne(SettingUjian::class, 'id_bank_soal', 'id_bank_soal');
 }
 
+protected static function booted()
+{
+    static::deleting(function ($banksoal) {
+        $banksoal->soals()->delete();
+    });
+}
+
 }

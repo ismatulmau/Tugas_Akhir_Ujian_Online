@@ -21,6 +21,13 @@
                     <p class="text-muted mb-4">
                         Terima kasih telah menyelesaikan ujian dengan baik. Jawaban Anda telah tersimpan secara otomatis.
                     </p>
+                    @if(session('hasil_ujian'))
+    <div class="alert alert-info mt-4">
+        <h5>Hasil Ujian:</h5>
+        <p><strong>Jumlah Benar:</strong> {{ session('hasil_ujian.jumlah_benar') }} dari {{ session('hasil_ujian.total_soal') }} soal</p>
+        <p><strong>Skor:</strong> {{ session('hasil_ujian.score') }}%</p>
+    </div>
+@endif
                     
                     <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
                         <form method="POST" action="{{ route('logout') }}">
