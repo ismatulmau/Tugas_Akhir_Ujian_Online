@@ -173,11 +173,16 @@
                                 {!! $soal->pertanyaan !!}
                             </div>
 
-                            @if($soal->gambar_soal)
+                            @php
+                            $gambarSoalPath = public_path('storage/' . $soal->gambar_soal);
+                            @endphp
+
+                            @if($soal->gambar_soal && file_exists($gambarSoalPath))
                             <div class="question-image mb-3">
-                                <img src="{{ asset('storage/' . $soal->gambar_soal) }}" alt="Gambar Soal" class="img-fluid">
+                                <img src="{{ asset('storage/' . $soal->gambar_soal) }}" alt="" class="img-fluid">
                             </div>
                             @endif
+
 
                             <div class="options-container">
                                 @foreach(['A', 'B', 'C', 'D', 'E'] as $opsi)
@@ -259,16 +264,17 @@
         const timerElements = document.querySelectorAll('[id^="time-remaining-"]');
 
         const examDurationMinutes = {{ $ujian->durasi }};
+
         const examDurationMillis = examDurationMinutes * 60 * 1000;
 
         // Timer
-            // let examStartTime = localStorage.getItem('examStartTime');
-            // if (!examStartTime) {
-            //     examStartTime = new Date().getTime();
-            //     localStorage.setItem('examStartTime', examStartTime);
-            // }
-            // const examEndTime = parseInt(examStartTime) + examDurationMillis;
-            // let timerInterval;
+        // let examStartTime = localStorage.getItem('examStartTime');
+        // if (!examStartTime) {
+        //     examStartTime = new Date().getTime();
+        //     localStorage.setItem('examStartTime', examStartTime);
+        // }
+        // const examEndTime = parseInt(examStartTime) + examDurationMillis;
+        // let timerInterval;
 
         function updateTimer() {
             const now = new Date().getTime();

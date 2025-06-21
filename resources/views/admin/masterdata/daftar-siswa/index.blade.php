@@ -79,14 +79,18 @@
               <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>
-                  @if($siswa->gambar)
-                  <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Foto Siswa" class="rounded-circle" width="40" height="40">
-                  @else
-                  <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                    <i class="fa fa-user text-white"></i>
-                  </div>
-                  @endif
-                </td>
+  @php
+      $fotoPath = public_path('storage/' . $siswa->gambar);
+  @endphp
+
+  @if($siswa->gambar && file_exists($fotoPath))
+    <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Foto Siswa" class="rounded-circle" width="40" height="40">
+  @else
+    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+      <i class="fa fa-user text-white"></i>
+    </div>
+  @endif
+</td>
                 <td>
                   <div>{{ $siswa->nomor_ujian }}</div>
                   <small class="text-muted">Sesi: {{ $siswa->sesi_ujian }}</small>
@@ -192,10 +196,10 @@
                             <label class="form-label">Foto Siswa (biarkan kosong jika tidak diganti)</label>
                             <input type="file" class="form-control" name="gambar">
                             @if($siswa->gambar)
-                                                    <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Gambar siswa"
-                                                        class="img-thumbnail"
-                                                        style="max-width: 60px; height: auto;">
-                                                    @endif
+                            <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Gambar siswa"
+                              class="img-thumbnail"
+                              style="max-width: 60px; height: auto;">
+                            @endif
                           </div>
                         </div>
                       </div>

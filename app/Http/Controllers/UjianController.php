@@ -67,7 +67,10 @@ public function submitUjian(Request $request, $id_sett_ujian)
         ]);
     }
 
-    // Hitung skor
+    // Ambil setting ujian dan relasi bank soal untuk ambil jml_soal
+    $settingUjian = \App\Models\SettingUjian::with('bankSoal')->findOrFail($id_sett_ujian);
+
+    // Hitung jumlah jawaban benar
     $jawaban = Jawaban::where('id_sett_ujian', $id_sett_ujian)
         ->where('id_siswa', $id_siswa)
         ->with('soal')
@@ -77,7 +80,9 @@ public function submitUjian(Request $request, $id_sett_ujian)
         return $j->jawaban === optional($j->soal)->jawaban_benar;
     })->count();
 
-    $totalSoal = $jawaban->count();
+    // Ambil total soal dari jml_soal di bank_soals
+    $totalSoal = $settingUjian->bankSoal->jml_soal ?? 0;
+
     $score = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100, 2) : 0;
 
     // Simpan data di session untuk ditampilkan di halaman konfirmasi
@@ -92,6 +97,7 @@ public function submitUjian(Request $request, $id_sett_ujian)
 
     return redirect()->route('siswa.konfirmasi-ujian');
 }
+
 
 
 

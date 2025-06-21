@@ -126,9 +126,9 @@ class SoalController extends Controller
         $bankSoal = $soal->banksoal;
 
         // Hapus gambar jika ada
-        if ($soal->gambar_soal && file_exists(public_path('storage/' . $soal->gambar_soal))) {
-            unlink(public_path('storage/' . $soal->gambar_soal));
-        }
+        if ($soal->gambar_soal && Storage::disk('public')->exists($soal->gambar_soal)) {
+    Storage::disk('public')->delete($soal->gambar_soal);
+}
 
         $soal->delete();
 
@@ -209,9 +209,9 @@ class SoalController extends Controller
 
         // Hapus file gambar jika ada
         foreach ($soals as $soal) {
-            if ($soal->gambar_soal && Storage::exists($soal->gambar_soal)) {
-                Storage::delete($soal->gambar_soal);
-            }
+            if ($soal->gambar_soal && Storage::disk('public')->exists($soal->gambar_soal)) {
+    Storage::disk('public')->delete($soal->gambar_soal);
+}
         }
 
         // Hapus semua soal

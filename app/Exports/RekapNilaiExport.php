@@ -56,7 +56,7 @@ class RekapNilaiExport implements FromArray, WithEvents
             })->count();
 
             $jumlahDijawab = $jawabanGroup->count();
-            $totalSoal = Soal::where('id_bank_soal', $s->id_bank_soal)->count();
+            $totalSoal = $s->bankSoal->jml_soal ?? 0;
             $nilai = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100, 2) : 0;
 
             $rekap[] = [

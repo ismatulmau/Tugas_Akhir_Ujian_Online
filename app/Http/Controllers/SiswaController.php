@@ -17,12 +17,17 @@ use App\Exports\SiswaTemplateExport;
 class SiswaController extends Controller
 {
     public function index()
-    {
-        $kelas = Kelas::all(); // Ambil semua data kelas
-        $siswas = Siswa::with('kelas')->get();
-        $jurusan = Kelas::select('jurusan')->distinct()->orderBy('jurusan')->get();
-        return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan'));
-    }
+{
+    $kelas = Kelas::all();
+    $jurusan = Kelas::select('jurusan')->distinct()->orderBy('jurusan')->get();
+
+    $siswas = Siswa::with('kelas')
+        ->orderByRaw("FIELD(level, 'X', 'XI', 'XII')")
+        ->get();
+
+    return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan'));
+}
+
 
     public function store(Request $request)
     {
@@ -61,11 +66,11 @@ class SiswaController extends Controller
 
         $gambarPath = null;
         if ($request->hasFile('gambar')) {
-            $file = $request->file('gambar');
-            $namaAsli = $file->getClientOriginalName(); // nama asli file
-            $file->move(public_path('storage/siswa_images'), $namaAsli); // pindah file
-            $gambarPath = 'siswa_images/' . $namaAsli; // path yang disimpan di DB
-        }
+    $file = $request->file('gambar');
+    $namaAsli = $file->getClientOriginalName();
+    $path = $file->storeAs('siswa_images', $namaAsli, 'public');
+    $gambarPath = $path;
+}
 
         Siswa::create([
             'nama_siswa' => $request->nama_siswa,
@@ -131,17 +136,17 @@ class SiswaController extends Controller
         }
 
         if ($request->hasFile('gambar')) {
-            // Hapus gambar lama
-            if ($siswa->gambar && Storage::disk('public')->exists($siswa->gambar)) {
-                Storage::disk('public')->delete($siswa->gambar);
-            }
+    // Hapus gambar lama
+    if ($siswa->gambar && Storage::disk('public')->exists($siswa->gambar)) {
+        Storage::disk('public')->delete($siswa->gambar);
+    }
 
-            // Simpan gambar baru dengan nama asli
-            $file = $request->file('gambar');
-            $namaAsli = $file->getClientOriginalName();
-            $file->move(public_path('storage/siswa_images'), $namaAsli);
-            $data['gambar'] = 'siswa_images/' . $namaAsli;
-        }
+    // Simpan gambar baru
+    $file = $request->file('gambar');
+    $namaAsli = $file->getClientOriginalName();
+    $path = $file->storeAs('siswa_images', $namaAsli, 'public');
+    $data['gambar'] = $path;
+}
 
         $siswa->update($data);
 
@@ -150,12 +155,21 @@ class SiswaController extends Controller
 
 
     public function destroy($id_siswa)
-    {
-        $siswa = Siswa::findOrFail($id_siswa);
-        $siswa->delete();
-
-        return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus.');
+{
+    $siswa = Siswa::findOrFail($id_siswa);
+    
+    // Hapus gambar dari storage jika ada
+    if ($siswa->gambar) {
+        $gambarPath = public_path('storage/' . $siswa->gambar);
+        if (file_exists($gambarPath)) {
+            unlink($gambarPath);
+        }
     }
+    
+    $siswa->delete();
+
+    return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus.');
+}
 
     public function downloadTemplate()
 {
@@ -163,18 +177,25 @@ class SiswaController extends Controller
 }
 
     public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls',
-        ]);
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls',
+    ]);
 
-        try {
-            Excel::import(new SiswaImport, $request->file('file'));
-            return redirect()->back()->with('success', 'Data berhasil diimpor.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
-        }
+    try {
+        $import = new SiswaImport();
+        Excel::import($import, $request->file('file'));
+
+        $total = $import->berhasil + $import->duplikat;
+        $message = "Import selesai. Total data: $total. 
+                    Berhasil: $import->berhasil. 
+                    Duplikat: $import->duplikat.";
+
+        return redirect()->back()->with('success', $message);
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
     }
+}
 
     //upload foto siswa
     public function uploadGambarMassal(Request $request)
@@ -213,7 +234,7 @@ class SiswaController extends Controller
         return back()->with('success', "Semua gambar berhasil diupload dan disimpan ke database ($berhasil foto).");
     }
 
-     public function cetakKartu(Request $request)
+ public function cetakKartu(Request $request)
     {
         $request->validate([
             'jurusan' => 'required',

@@ -160,13 +160,15 @@
         <div class="signature-section">
             <table class="signature-table">
                 <tr>
-                    <td>
-                        @if($siswa->gambar)
-                        <img src="{{ storage_path('app/public/' . $siswa->gambar) }}" alt="Foto">
-                        @else
-                        <div class="foto-placeholder">Foto<br>Siswa</div>
-                        @endif
-                    </td>
+                    @php
+    $fotoPath = storage_path('app/public/' . $siswa->gambar);
+@endphp
+
+<td>
+    @if($siswa->gambar && file_exists($fotoPath))
+        <img src="{{ $fotoPath }}">
+    @endif
+</td>
                     <td></td>
                     <td>
                         <div class="tanggal">Indramayu, {{ date('d F Y') }}</div>
