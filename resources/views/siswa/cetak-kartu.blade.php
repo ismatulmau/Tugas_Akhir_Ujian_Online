@@ -139,13 +139,13 @@
                 <td>: {{ strtoupper($siswa->nama_siswa) }}</td>
             </tr>
             <tr>
-    <td width="30%"><strong>Kelas</strong></td>
-    <td>: {{ $siswa->kelas->nama_kelas ?? '-' }} ({{ $siswa->jurusan }})</td>
-</tr>
-<tr>
-    <td><strong>Sesi & Ruang Ujian</strong></td>
-    <td>: Sesi {{ $siswa->sesi_ujian }} - Ruang {{ $siswa->ruang_ujian }}</td>
-</tr>
+                <td width="30%"><strong>Kelas</strong></td>
+                <td>: {{ $siswa->kelas->nama_kelas ?? '-' }} ({{ $siswa->jurusan }})</td>
+            </tr>
+            <tr>
+                <td><strong>Sesi & Ruang Ujian</strong></td>
+                <td>: Sesi {{ $siswa->sesi_ujian }} - Ruang {{ $siswa->ruang_ujian }}</td>
+            </tr>
             <tr>
                 <td><strong>Username</strong></td>
                 <td>: {{ $siswa->nomor_ujian }}</td>
@@ -161,14 +161,14 @@
             <table class="signature-table">
                 <tr>
                     @php
-    $fotoPath = storage_path('app/public/' . $siswa->gambar);
-@endphp
+                    $fotoPath = storage_path('app/public/' . $siswa->gambar);
+                    @endphp
 
-<td>
-    @if($siswa->gambar && file_exists($fotoPath))
-        <img src="{{ $fotoPath }}">
-    @endif
-</td>
+                    <td>
+                        @if($siswa->gambar && file_exists($fotoPath))
+                        <img src="{{ $fotoPath }}">
+                        @endif
+                    </td>
                     <td></td>
                     <td>
                         <div class="tanggal">Indramayu, {{ date('d F Y') }}</div>
@@ -183,6 +183,47 @@
         <div class="catatan">
             Kartu ini wajib dibawa selama ujian berlangsung
         </div>
+    </div>
+    {{-- Halaman Belakang (Jadwal Ujian) --}}
+    <div class="kartu">
+        <div class="header-kartu">
+            <h2>JADWAL UJIAN</h2>
+        </div>
+        <table border="1" cellspacing="0" cellpadding="4" style="font-size:9px; width:100%; border-collapse: collapse; text-align:center;">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">No</th> <!-- Lebar kolom No diset ke 30px -->
+                    <th>Hari / Tanggal</th>
+                    <th>Waktu</th>
+                    <th>Mata Pelajaran</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $no = 1; @endphp
+                @foreach($jadwalUjian as $group => $items)
+                @php
+                $parts = explode('|', $group);
+                $hari = $parts[0] ?? '-';
+                $tanggal = $parts[1] ?? '-';
+                $rowspan = count($items);
+                @endphp
+                @foreach($items as $index => $jadwal)
+                <tr>
+                    <td>{{ $no++ }}</td>
+                    @if($index == 0)
+                    <td rowspan="{{ $rowspan }}">
+                        {{ $hari }}, {{ \Carbon\Carbon::parse($tanggal)->format('d-m-Y') }}
+                    </td>
+                    @endif
+                    <td>{{ $jadwal['jam'] ?? '-' }}</td>
+                    <td>{{ $jadwal['mapel'] ?? '-' }}</td>
+                </tr>
+                @endforeach
+                @endforeach
+
+
+            </tbody>
+        </table>
     </div>
     @endforeach
 </body>

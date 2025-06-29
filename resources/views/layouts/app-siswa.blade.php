@@ -9,11 +9,16 @@
         .navbar-custom {
             background-color: #001a33 !important;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1030;
         }
         .navbar-brand {
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+        .navbar-nav {
+    position: relative;
+    z-index: 1051;
+}
         .student-welcome {
             font-size: 0.95rem;
             color: rgba(255, 255, 255, 0.9);
@@ -32,6 +37,7 @@
             border-radius: 8px;
             border: none;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1050;
         }
         .dropdown-item {
             padding: 8px 16px;

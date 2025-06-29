@@ -26,8 +26,10 @@
                         <th>Bank Soal</th>
                         <th>Mata Pelajaran</th>
                         <th>Jenis Tes</th>
+                        <th>Level</th>
                         <th>Semester</th>
                         <th>Sesi</th>
+                        <th>Pengawas</th>
                         <th>Waktu Mulai</th>
                         <th>Waktu Selesai</th>
                         <th>Durasi</th>
@@ -41,8 +43,12 @@
                         <td>{{ $jadwal->bankSoal->nama_bank_soal ?? '-' }}</td>
                         <td>{{ $jadwal->bankSoal->mapel->nama_mapel ?? '-' }}</td>
                         <td>{{ ucfirst($jadwal->jenis_tes) }}</td>
+                        <td>{{ $jadwal->bankSoal->level }} <br>
+                            <small class="text-muted">{{ $jadwal->bankSoal->jurusan ?? '' }}</small>
+                        </td>
                         <td>{{ $jadwal->semester }}</td>
                         <td>{{ $jadwal->sesi }}</td>
+                        <td>{{ $jadwal->nama_pengawas }}</td>
                         <td>{{ \Carbon\Carbon::parse($jadwal->waktu_mulai)->format('d M Y H:i') }}</td>
                         <td>{{ \Carbon\Carbon::parse($jadwal->waktu_selesai)->format('d M Y H:i') }}</td>
                         <td>{{ $jadwal->durasi }} menit</td>

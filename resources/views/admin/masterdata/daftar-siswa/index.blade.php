@@ -79,18 +79,18 @@
               <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>
-  @php
-      $fotoPath = public_path('storage/' . $siswa->gambar);
-  @endphp
+                  @php
+                  $fotoPath = public_path('storage/' . $siswa->gambar);
+                  @endphp
 
-  @if($siswa->gambar && file_exists($fotoPath))
-    <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Foto Siswa" class="rounded-circle" width="40" height="40">
-  @else
-    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-      <i class="fa fa-user text-white"></i>
-    </div>
-  @endif
-</td>
+                  @if($siswa->gambar && file_exists($fotoPath))
+                  <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Foto Siswa" class="rounded-circle" width="40" height="40">
+                  @else
+                  <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fa fa-user text-white"></i>
+                  </div>
+                  @endif
+                </td>
                 <td>
                   <div>{{ $siswa->nomor_ujian }}</div>
                   <small class="text-muted">Sesi: {{ $siswa->sesi_ujian }}</small>
@@ -365,19 +365,17 @@
             <label for="jurusan" class="form-label">Jurusan</label>
             <select class="form-select" name="jurusan" required>
               <option value="">-- Pilih Jurusan --</option>
-              <option value="all">Semua Jurusan</option> <!-- Tambahan -->
               @foreach($jurusan as $jrs)
               <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
               @endforeach
             </select>
           </div>
           <div class="mb-3">
-            <label for="kelas" class="form-label">Level</label>
-            <select class="form-select" id="kelas" name="kelas" required>
-              <option value="">-- Pilih Level --</option>
-              <option value="all">Semua Level</option> <!-- Tambahan -->
-              @foreach(['X', 'XI', 'XII'] as $level)
-              <option value="{{ $level }}">{{ $level }}</option>
+            <label for="kelas" class="form-label">Kelas</label>
+            <select class="form-select" id="nama_kelas" name="nama_kelas" required>
+              <option value="">-- Pilih Kelas --</option>
+              @foreach($kelas as $kls)
+              <option value="{{ $kls->nama_kelas }}">{{ $kls->nama_kelas }}</option>
               @endforeach
             </select>
           </div>
@@ -401,6 +399,57 @@
             <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
             <input type="text" class="form-control" id="nip_kepala" name="nip_kepala" required>
           </div>
+          <div class="mb-3">
+            <label for="jadwal_ujian" class="form-label">Jadwal Ujian</label>
+            <small class="d-block text-muted">Klik "Tambah" untuk tambah jadwal:</small>
+
+            <div id="jadwal-wrapper">
+              <div class="row g-2 mb-2">
+                <div class="col-3">
+                  <input type="text" name="jadwal[0][hari]" class="form-control" placeholder="Hari (cth: Senin)">
+                </div>
+                <div class="col-3">
+                  <input type="date" name="jadwal[0][tanggal]" class="form-control">
+                </div>
+                <div class="col-3">
+                  <input type="text" name="jadwal[0][jam]" class="form-control" placeholder="Jam">
+                </div>
+                <div class="col-3">
+                  <input type="text" name="jadwal[0][mapel]" class="form-control" placeholder="Mapel">
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="tambahJadwal()">+ Tambah</button>
+          </div>
+
+          <script>
+            let jadwalIndex = 1;
+
+            function tambahJadwal() {
+              const wrapper = document.getElementById('jadwal-wrapper');
+              const row = document.createElement('div');
+              row.classList.add('row', 'g-2', 'mb-2');
+              row.innerHTML = `
+        <div class="col-3">
+            <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control" placeholder="Hari">
+        </div>
+        <div class="col-3">
+            <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control">
+        </div>
+        <div class="col-3">
+            <input type="text" name="jadwal[${jadwalIndex}][jam]" class="form-control" placeholder="Jam">
+        </div>
+        <div class="col-3">
+            <input type="text" name="jadwal[${jadwalIndex}][mapel]" class="form-control" placeholder="Mapel">
+        </div>
+    `;
+              wrapper.appendChild(row);
+              jadwalIndex++;
+            }
+          </script>
+
+
 
         </div>
         <div class="modal-footer">

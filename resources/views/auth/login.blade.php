@@ -66,18 +66,18 @@
                                 <form method="POST" action="{{ route('login.submit') }}">
                                     @csrf
                                     <div class="mb-3">
-                                        <label class="form-label">Nama Pengguna</label>
+                                        <label class="form-label">Usename / Nomor Ujian</label>
                                         <input class="form-control form-control-lg" type="text" name="username"
                                             placeholder="Masukkan nama pengguna" required autofocus />
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Kata Sandi</label>
+                                        <label class="form-label">Password</label>
                                         <input class="form-control form-control-lg" type="password" name="password"
                                             placeholder="Masukkan kata sandi" required />
                                     </div>
                                     <div class="d-grid mt-4">
                                         <button type="submit" class="btn btn-lg btn-primary">
-                                            <i class="fas fa-sign-in-alt me-2"></i>Masuk
+                                            <i class="fas fa-sign-in-alt me-2"></i>Login
                                         </button>
                                     </div>
 

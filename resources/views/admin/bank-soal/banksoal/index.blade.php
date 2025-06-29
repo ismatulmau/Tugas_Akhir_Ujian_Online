@@ -192,7 +192,7 @@
                           </div>
 
                           <div class="col-md-6">
-                            <label for="jml_soal" class="form-label">Jumlah Soal</label>
+                            <label for="jml_soal" class="form-label">Jumlah Soal Ditampilkan</label>
                             <input type="number" class="form-control" name="jml_soal" value="{{ $banksoal->jml_soal }}" required min="1">
                           </div>
                         </div>
@@ -314,7 +314,7 @@
             </div>
 
             <div class="col-md-6">
-              <label for="jml_soal" class="form-label">Jumlah Soal</label>
+              <label for="jml_soal" class="form-label">Jumlah Soal Ditampilkan</label>
               <input type="number" class="form-control" name="jml_soal" required min="1">
             </div>
           </div>

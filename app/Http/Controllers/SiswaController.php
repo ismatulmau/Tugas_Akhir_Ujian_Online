@@ -21,8 +21,11 @@ class SiswaController extends Controller
     $kelas = Kelas::all();
     $jurusan = Kelas::select('jurusan')->distinct()->orderBy('jurusan')->get();
 
-    $siswas = Siswa::with('kelas')
+    $siswas = Siswa::with(['kelas' => function($query) {
+            $query->orderBy('nama_kelas');
+        }])
         ->orderByRaw("FIELD(level, 'X', 'XI', 'XII')")
+        ->orderBy('nama_siswa')
         ->get();
 
     return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan'));
@@ -234,44 +237,61 @@ class SiswaController extends Controller
         return back()->with('success', "Semua gambar berhasil diupload dan disimpan ke database ($berhasil foto).");
     }
 
- public function cetakKartu(Request $request)
-    {
-        $request->validate([
-            'jurusan' => 'required',
-            'kelas' => 'required',
-            'jenis_ujian' => 'required',
-            'tahun_pelajaran' => 'required|string',
-            'nama_kepala' => 'required|string',
-            'nip_kepala' => 'required|string'
-        ]);
+public function cetakKartu(Request $request)
+{
+    $request->validate([
+        'jurusan' => 'required',
+        'nama_kelas' => 'required',
+        'jenis_ujian' => 'required',
+        'tahun_pelajaran' => 'required|string',
+        'nama_kepala' => 'required|string',
+        'nip_kepala' => 'required|string',
+        'jadwal' => 'array',
+        'jadwal.*.hari' => 'nullable|string',
+        'jadwal.*.tanggal' => 'nullable|date',
+        'jadwal.*.jam' => 'nullable|string',
+        'jadwal.*.mapel' => 'nullable|string',
+    ]);
 
-        $query = Siswa::query();
+    $query = Siswa::query();
 
-        if ($request->jurusan !== 'all') {
-            $query->where('jurusan', $request->jurusan);
-        }
-
-        if ($request->kelas !== 'all') {
-            $query->where('level', $request->kelas);
-        }
-
-        $siswas = $query->get();
-
-        if ($siswas->isEmpty()) {
-            return back()->with('error', 'Tidak ada data siswa untuk kriteria tersebut');
-        }
-
-        $pdf = Pdf::loadView('siswa.cetak-kartu', [
-            'siswas' => $siswas,
-            'jenis_ujian' => $request->jenis_ujian,
-            'tahun_pelajaran' => $request->tahun_pelajaran,
-            'nama_kepala' => $request->nama_kepala,
-            'nip_kepala' => $request->nip_kepala,
-
-        ]);
-
-        return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
+    if ($request->jurusan !== 'all') {
+        $query->where('jurusan', $request->jurusan);
     }
+
+    if ($request->nama_kelas !== 'all') {
+    $query->where('kode_kelas', function ($sub) use ($request) {
+        $sub->select('kode_kelas')->from('kelas')->where('nama_kelas', $request->nama_kelas);
+    });
+}
+
+    $siswas = $query->get();
+
+    if ($siswas->isEmpty()) {
+        return back()->with('error', 'Tidak ada data siswa untuk kriteria tersebut');
+    }
+
+   $jadwalUjian = collect($request->jadwal)
+    ->filter(fn($item) => !empty($item['hari']) || !empty($item['tanggal']) || !empty($item['jam']) || !empty($item['mapel']))
+    ->groupBy(function ($item) {
+        $hari = $item['hari'] ?? '-';
+        $tanggal = $item['tanggal'] ?? '-';
+        return $hari . '|' . $tanggal;
+    });
+
+
+    $pdf = Pdf::loadView('siswa.cetak-kartu', [
+        'siswas' => $siswas,
+        'jenis_ujian' => $request->jenis_ujian,
+        'tahun_pelajaran' => $request->tahun_pelajaran,
+        'nama_kepala' => $request->nama_kepala,
+        'nip_kepala' => $request->nip_kepala,
+        'jadwalUjian' => $jadwalUjian,
+    ]);
+
+    return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
+}
+
     public function dataPeserta()
 {
     $siswa = Auth::guard('siswa')->user();
@@ -302,9 +322,4 @@ public function dataUjian(Request $request)
    session(['ujian_terverifikasi' => $ujian->id_sett_ujian]);
 return view('siswa.data-ujian', compact('ujian'));
 }
-
-
-
-
-    
 }
