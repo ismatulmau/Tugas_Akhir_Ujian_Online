@@ -292,15 +292,29 @@ public function cetakKartu(Request $request)
     return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
 }
 
-    public function dataPeserta()
+public function dataPeserta()
 {
     $siswa = Auth::guard('siswa')->user();
-
-    // Muat relasi kelas (pastikan model Siswa memiliki relasi `kelas()`)
     $siswa->load('kelas');
 
-    return view('siswa.data-peserta', compact('siswa'));
+    // Ambil token dari ujian aktif yang cocok dengan jurusan, level dan kelas siswa
+    $ujian = \App\Models\SettingUjian::with('bankSoal')
+        ->whereHas('bankSoal', function ($query) use ($siswa) {
+            $query->where('jurusan', $siswa->jurusan)
+                  ->where('level', $siswa->level)
+                  ->where(function ($q) use ($siswa) {
+                      $q->where('kode_kelas', $siswa->kode_kelas)
+                        ->orWhere('kode_kelas', 'ALL');
+                  });
+        })
+        ->where('status', 'aktif')
+        ->first();
+
+    $token_ujian = $ujian->token ?? null;
+
+    return view('siswa.data-peserta', compact('siswa', 'token_ujian'));
 }
+
 
 public function dataUjian(Request $request)
 {

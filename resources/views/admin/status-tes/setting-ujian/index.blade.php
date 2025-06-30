@@ -59,7 +59,6 @@
             <th>Waktu Selesai</th>
             <th>Durasi</th>
             <th>Sesi</th>
-            <th>Pengawas</th>
             <th>Tes</th>
             <th>Token</th>
             <th>Status</th>
@@ -74,7 +73,7 @@
             <td>{{ $banksoal->nama_bank_soal }}</td>
             <td>{{ $banksoal->mapel->nama_mapel ?? '-' }}</td>
             <td>
-              {{ $banksoal->level ?? '-' }}<br>
+              {{ $banksoal->level ?? '-' }} - {{ $banksoal->kode_kelas == 'ALL' ? 'ALL' : ($banksoal->kelas->kode_kelas ?? '-') }} <br>
               <small class="text-muted">{{ $banksoal->jurusan ?? '' }}</small>
             </td>
             <td>
@@ -85,7 +84,6 @@
             <td>{{ $setting?->waktu_selesai ?? '-' }}</td>
             <td>{{ $setting?->durasi ? $setting->durasi . ' menit' : '-' }}</td>
             <td>{{ $setting?->sesi ?? '-' }}</td>
-            <td>{{ $setting?->nama_pengawas ?? '-' }}</td>
             <td>{{ $setting?->jenis_tes ?? '-' }}</td>
             <td>{{ $setting?->token ?? '-' }}</td>
 
@@ -163,10 +161,6 @@
                         <input type="text" name="sesi" class="form-control" value="{{ $setting->sesi }}" required>
                       </div>
                       <div class="col-md-6">
-                        <label class="form-label">Pengawas Ujian</label>
-                        <input type="text" name="nama_pengawas" class="form-control" value="{{ $setting->nama_pengawas }}" required>
-                      </div>
-                      <div class="col-md-6">
                         <label class="form-label">Token Ujian</label>
                         <input type="text" name="token" class="form-control" value="{{ $setting->token }}" required>
                       </div>
@@ -240,10 +234,6 @@
             <div class="col-md-6">
               <label class="form-label">Sesi Ujian</label>
               <input type="text" name="sesi" class="form-control" required placeholder="Contoh: Sesi 1">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Pengawas Ujian</label>
-              <input type="text" name="nama_pengawas" class="form-control" required placeholder="Contoh: nama_pengawas 1">
             </div>
             <div class="col-md-6">
               <label class="form-label">Token Ujian</label>

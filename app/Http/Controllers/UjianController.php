@@ -21,11 +21,13 @@ class UjianController extends Controller
 
     if (
     $ujian->bankSoal->jurusan !== $siswa->jurusan ||
-    $ujian->bankSoal->level !== $siswa->level
+    $ujian->bankSoal->level !== $siswa->level ||
+    ($ujian->bankSoal->kode_kelas !== 'ALL' && $ujian->bankSoal->kode_kelas !== $siswa->kode_kelas)
 ) {
     return redirect()->route('siswa.data-peserta')
-        ->with('error', 'Ujian ini tidak sesuai dengan jurusan atau tingkat Anda.');
+        ->with('error', 'Ujian ini tidak sesuai dengan jurusan, kelas atau tingkat Anda.');
 }
+
 
     if ($ujian->status !== 'aktif' || $ujian->bankSoal->status !== 'aktif') {
         return redirect()->route('siswa.data-peserta')

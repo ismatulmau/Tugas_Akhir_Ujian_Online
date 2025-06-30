@@ -68,9 +68,11 @@
                 <td>{{ $banksoal->nama_bank_soal }}</td>
                 <td>{{ $banksoal->mapel->nama_mapel ?? '-' }}</td>
                 <td>
-                  {{ $banksoal->level ?? '-' }}<br>
-                  <small class="text-muted">{{ $banksoal->jurusan ?? '' }}</small>
-                </td>
+  {{ $banksoal->level ?? '-' }} - 
+  {{ $banksoal->kode_kelas == 'ALL' ? 'ALL' : ($banksoal->kelas->kode_kelas ?? '-') }}<br>
+  <small class="text-muted">{{ $banksoal->jurusan ?? '' }}</small>
+</td>
+
                 <td>
                   <small>Opsi: {{ $banksoal->opsi_jawaban }}</small><br>
                   <small>Ditampilkan: {{ $banksoal->jml_soal }}</small><br>
@@ -162,7 +164,8 @@
 
                           <div class="col-md-6">
                             <label for="jurusan" class="form-label">Jurusan</label>
-                            <select class="form-select" name="jurusan" required>
+                            <select name="jurusan" id="jurusan" class="form-control" required>
+                              <option value="">-- Pilih Jurusan --</option>
                               @foreach($jurusan as $jrs)
                               <option value="{{ $jrs->jurusan }}" {{ $banksoal->jurusan == $jrs->jurusan ? 'selected' : '' }}>
                                 {{ $jrs->jurusan }}
@@ -172,7 +175,7 @@
                           </div>
 
                           <div class="col-md-6">
-                            <label for="level">Level Kelas</label>
+                            <label for="level" class="form-label">Level Kelas</label>
                             <select class="form-control" name="level" id="level" required>
                               <option value="">-- Pilih Level --</option>
                               @foreach(['X', 'XI', 'XII'] as $level)
@@ -182,6 +185,25 @@
                               @endforeach
                             </select>
                           </div>
+
+                          <div class="col-md-6">
+                            <label for="level">Kelas</label>
+                            <select name="kode_kelas" id="kode_kelas" class="form-control" required>
+                              <option value="">-- Pilih Kelas --</option>
+                              <option value="ALL">Semua Kelas</option>
+                              @foreach($kelas as $kls)
+                              <option
+                                value="{{ $kls->kode_kelas }}"
+                                data-jurusan="{{ $kls->jurusan }}"
+                                data-level="{{ $kls->level }}">
+                                {{ $kls->kode_kelas }}
+                              </option>
+                              @endforeach
+                            </select>
+
+                          </div>
+
+
 
                           <div class="col-md-6">
                             <label for="opsi_jawaban" class="form-label">Opsi Jawaban</label>
@@ -244,13 +266,13 @@
             </tbody>
           </table>
           <div class="mt-4 alert alert-warning" role="alert">
-        <h6 class="fw-bold">Catatan Penting:</h6>
-        <ul class="mb-0">
-          <li>Tidak diperbolehkan mengaktifkan lebih dari satu bank soal untuk <strong>level</strong> dan <strong>jurusan</strong> yang sama secara bersamaan.</li>
-          <li>Aktifkan Bank Soal ketika akan digunakan untuk ujian</li>
-          <li>NonAktifkan Bank Soal ketika sudah selesai ujian</li>
-        </ul>
-      </div>
+            <h6 class="fw-bold">Catatan Penting:</h6>
+            <ul class="mb-0">
+              <li>Tidak diperbolehkan mengaktifkan lebih dari satu bank soal untuk <strong>level</strong>, <strong>kelas</strong> dan <strong>jurusan</strong> yang sama secara bersamaan.</li>
+              <li>Aktifkan Bank Soal ketika akan digunakan untuk ujian</li>
+              <li>NonAktifkan Bank Soal ketika sudah selesai ujian</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -286,22 +308,41 @@
 
             <div class="col-md-6">
               <label for="jurusan" class="form-label">Jurusan</label>
-              <select class="form-select" name="jurusan" required>
+              <select name="jurusan" id="jurusan_tambah" class="form-control" required>
                 <option value="">-- Pilih Jurusan --</option>
-                @foreach($jurusan as $jrs)
-                <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
+                @foreach($jurusan as $item)
+                <option value="{{ $item->jurusan }}">{{ $item->jurusan }}</option>
                 @endforeach
               </select>
             </div>
 
             <div class="col-md-6">
-              <label for="level" class="form-label">Level</label>
-              <select class="form-select" name="level" required>
+              <label for="level" class="form-label">Level Kelas</label>
+              <select class="form-control" name="level" id="level_tambah" required>
                 <option value="">-- Pilih Level --</option>
-                <option value="X">X</option>
-                <option value="XI">XI</option>
-                <option value="XII">XII</option>
+                @foreach(['X', 'XI', 'XII'] as $level)
+                <option value="{{ $level }}" {{ old('level') == $level ? 'selected' : '' }}>
+                  {{ $level }}
+                </option>
+                @endforeach
               </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="level">Kelas</label>
+              <select name="kode_kelas" id="kode_kelas_tambah" class="form-control" required>
+                <option value="">-- Pilih Kelas --</option>
+                <option value="ALL">Semua Kelas</option>
+                @foreach($kelas as $kls)
+                <option
+                  value="{{ $kls->kode_kelas }}"
+                  data-jurusan="{{ $kls->jurusan }}"
+                  data-level="{{ $kls->level }}">
+                  {{ $kls->kode_kelas }}
+                </option>
+                @endforeach
+              </select>
+
             </div>
 
             <div class="col-md-6">
@@ -327,5 +368,38 @@
     </form>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const jurusanSelect = document.getElementById('jurusan_tambah');
+    const levelSelect = document.getElementById('level_tambah');
+    const kelasSelect = document.getElementById('kode_kelas_tambah');
+    const allOptions = Array.from(kelasSelect.options);
+
+    function filterKelas() {
+      const selectedJurusan = jurusanSelect.value;
+      const selectedLevel = levelSelect.value;
+
+      kelasSelect.innerHTML = `
+        <option value="">-- Pilih Kelas --</option>
+        <option value="ALL">Semua Kelas</option>
+      `;
+
+      allOptions.forEach(option => {
+        const jurusan = option.dataset.jurusan;
+        const level = option.dataset.level;
+
+        if (jurusan === selectedJurusan && level === selectedLevel) {
+          kelasSelect.appendChild(option);
+        }
+      });
+    }
+
+    jurusanSelect.addEventListener('change', filterKelas);
+    levelSelect.addEventListener('change', filterKelas);
+  });
+</script>
+
+
 
 @endsection

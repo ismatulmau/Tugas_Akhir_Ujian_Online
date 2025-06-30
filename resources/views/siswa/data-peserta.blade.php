@@ -47,6 +47,12 @@
                             <input type="text" class="form-control bg-light"
                                    value="{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}" readonly>
                         </div>
+                         @if($token_ujian)
+    <div class="alert alert-info">
+        <strong>Token Ujian Anda:</strong> {{ $token_ujian }}
+        <br><small>Silakan ketikkan ulang token ini untuk memulai ujian.</small>
+    </div>
+@endif
 
                         <!-- Token -->
                         <div class="mb-4">

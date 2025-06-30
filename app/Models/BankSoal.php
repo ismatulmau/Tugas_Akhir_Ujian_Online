@@ -16,6 +16,7 @@ class BankSoal extends Model
 
     protected $fillable = [
         'nama_bank_soal',
+        'kode_kelas',
         'level',
         'kode_mapel',
         'jurusan',

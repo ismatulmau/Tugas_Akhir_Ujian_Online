@@ -47,7 +47,7 @@
                         <td>{{ $i + 1 }}</td>
                         <td>{{ $setting->bankSoal->nama_bank_soal ?? '-' }}</td>
                         <td>{{ $setting->bankSoal->mapel->nama_mapel ?? '-' }}</td>
-                        <td>{{ $setting->bankSoal->level ?? '-' }}<br><small class="text-muted">{{ $setting->bankSoal->jurusan ?? '-' }}</small></td>
+                        <td>{{ $setting->bankSoal->level ?? '-' }} - {{ $setting->banksoal->kode_kelas == 'ALL' ? 'ALL' : ($setting->banksoal->kelas->kode_kelas ?? '-') }}<br><small class="text-muted">{{ $setting->bankSoal->jurusan ?? '-' }}</small></td>
                         <td>{{ $setting->waktu_mulai }}</td>
                         <td>{{ $setting->waktu_selesai }}</td>
                         <td>{{ $setting->durasi }}</td>

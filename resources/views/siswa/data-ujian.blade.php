@@ -48,7 +48,7 @@ $masihBisaUjian = $sekarang->lte($waktuSelesai);
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Kelas</label>
-                                    <input type="text" class="form-control bg-light" value="{{ $ujian->bankSoal->level ?? '-' }} ({{ $ujian->bankSoal->jurusan ?? '-' }})" readonly>
+                                    <input type="text" class="form-control bg-light" value="{{ $ujian->bankSoal->level ?? '-' }} - {{ $ujian->banksoal->kode_kelas == 'ALL' ? 'ALL' : ($ujian->banksoal->kelas->kode_kelas ?? '-') }}({{ $ujian->bankSoal->jurusan ?? '-' }})" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Jenis Tes</label>

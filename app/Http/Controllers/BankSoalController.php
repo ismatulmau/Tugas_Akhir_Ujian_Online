@@ -22,6 +22,7 @@ class BankSoalController extends Controller
     {
         $request->validate([
             'nama_bank_soal' => 'required|max:50',
+            'kode_kelas' => 'required|string',
             'level' => 'required|in:X,XI,XII', // Validasi level
             'kode_mapel' => 'required|exists:mapels,kode_mapel',
             'jurusan' => 'required|string|max:50',
@@ -30,6 +31,7 @@ class BankSoalController extends Controller
         ],  [
             'nama_bank_soal.required' => 'Nama bank soal harus diisi',
             'nama_bank_soal.max' => 'Nama bank soal maksimal 50 karakter',
+            'kode_kelas.required' => 'Kelas harus diisi',
             'level.required' => 'Level harus diisi',
             'level.in' => 'Level harus salah satu dari: X, XI, atau XII',
             'kode_mapel.required' => 'Kode mapel harus diisi',
@@ -43,6 +45,7 @@ class BankSoalController extends Controller
 
         // Cek apakah sudah ada bank soal dengan level dan jurusan yang sama
         $cekDuplikat = BankSoal::where('nama_bank_soal', $request->nama_bank_soal)
+            ->where('kode_kelas', $request->kode_kelas)
             ->where('level', $request->level)
             ->where('jurusan', $request->jurusan)
             ->exists();
@@ -50,11 +53,12 @@ class BankSoalController extends Controller
         if ($cekDuplikat) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['duplicate' => 'Bank soal untuk level ' . $request->level . ' dan jurusan ' . $request->jurusan . ' sudah ada.']);
+                ->withErrors(['duplicate' => 'Bank soal untuk level ' . $request->level .  $request->kode_kelas. ' dan jurusan ' . $request->jurusan . ' sudah ada.']);
         }
 
         BankSoal::create([
             'nama_bank_soal' => $request->nama_bank_soal,
+            'kode_kelas' => $request->kode_kelas,
             'level' => $request->level,
             'kode_mapel' => $request->kode_mapel,
             'jurusan' => $request->jurusan,
@@ -77,6 +81,7 @@ class BankSoalController extends Controller
     {
         $request->validate([
             'nama_bank_soal' => 'required|max:50',
+            'kode_kelas' => 'required|string',
             'level' => 'required|in:X,XI,XII',
             'kode_mapel' => 'required|exists:mapels,kode_mapel',
             'jurusan' => 'required|string|max:50',
@@ -85,6 +90,7 @@ class BankSoalController extends Controller
         ],  [
             'nama_bank_soal.required' => 'Nama bank soal harus diisi',
             'nama_bank_soal.max' => 'Nama bank soal maksimal 50 karakter',
+            'kode_kelas.required' => 'Kelas harus diisi',
             'level.required' => 'Level harus diisi',
             'level.in' => 'Level harus salah satu dari: X, XI, atau XII',
             'kode_mapel.required' => 'Kode mapel harus diisi',
@@ -99,6 +105,7 @@ class BankSoalController extends Controller
 
         // Cek duplikat dengan mengabaikan data yang sedang diupdate
         $cekDuplikat = BankSoal::where('nama_bank_soal', $request->nama_bank_soal)
+            ->where('kode_kelas', $request->kode_kelas)
             ->where('level', $request->level)
             ->where('jurusan', $request->jurusan)
             ->where('id_bank_soal', '!=', $id_bank_soal) // abaikan data saat ini
@@ -107,11 +114,12 @@ class BankSoalController extends Controller
         if ($cekDuplikat) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['duplicate' => 'Bank soal untuk level ' . $request->level . ' dan jurusan ' . $request->jurusan . ' sudah ada']);
+                ->withErrors(['duplicate' => 'Bank soal untuk level ' . $request->level . $request->kode_kelas. ' dan jurusan ' . $request->jurusan . ' sudah ada']);
         }
 
         $banksoal->update([
             'nama_bank_soal' => $request->nama_bank_soal,
+            'kode_kelas' => $request->kode_kelas,
             'level' => $request->level,
             'kode_mapel' => $request->kode_mapel,
             'jurusan' => $request->jurusan,
@@ -139,12 +147,13 @@ public function toggleStatus($id_bank_soal)
         // Cek apakah ada bank soal lain yang aktif dengan level dan jurusan yang sama
         $sudahAktif = BankSoal::where('level', $banksoal->level)
             ->where('jurusan', $banksoal->jurusan)
+            ->where('kode_kelas', $banksoal->kode_kelas)
             ->where('status', 'aktif')
             ->where('id_bank_soal', '!=', $id_bank_soal)
             ->exists();
 
         if ($sudahAktif) {
-            return back()->with('error', 'Bank soal untuk level ' . $banksoal->level . ' dan jurusan ' . $banksoal->jurusan . ' sudah ada yang aktif.');
+            return back()->with('error', 'Bank soal untuk level ' . $banksoal->level . $banksoal->kode_kelas.  ' dan jurusan ' . $banksoal->jurusan . ' sudah ada yang aktif.');
         }
 
         // Cek apakah memiliki soal
