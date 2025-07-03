@@ -352,7 +352,7 @@
 
 <!-- Modal Cetak Kartu Ujian -->
 <div class="modal fade" id="modalCetakKartu" tabindex="-1" aria-labelledby="modalCetakKartuLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form action="{{ route('siswa.cetak-kartu') }}" method="POST">
         @csrf
@@ -361,97 +361,86 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label for="jurusan" class="form-label">Jurusan</label>
-            <select class="form-select" name="jurusan" required>
-              <option value="">-- Pilih Jurusan --</option>
-              @foreach($jurusan as $jrs)
-              <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
-              @endforeach
-            </select>
+          <div class="row">
+            <!-- Kolom Kiri -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="jurusan" class="form-label">Jurusan</label>
+                <select class="form-select" name="jurusan" required>
+                  <option value="">-- Pilih Jurusan --</option>
+                  @foreach($jurusan as $jrs)
+                  <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
+                  @endforeach
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="kelas" class="form-label">Kelas</label>
+                <select class="form-select" id="nama_kelas" name="nama_kelas" required>
+                  <option value="">-- Pilih Kelas --</option>
+                  @foreach($kelas as $kls)
+                  <option value="{{ $kls->nama_kelas }}">{{ $kls->nama_kelas }}</option>
+                  @endforeach
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="jenis_ujian" class="form-label">Jenis Ujian</label>
+                <select class="form-select" id="jenis_ujian" name="jenis_ujian" required>
+                  <option value="">-- Pilih Jenis Ujian --</option>
+                  <option value="UTS">UTS</option>
+                  <option value="UAS">UAS</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Kolom Kanan -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+                <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran" placeholder="Contoh: 2024/2025" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
+                <input type="text" class="form-control" id="nama_kepala" name="nama_kepala" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
+                <input type="text" class="form-control" id="nip_kepala" name="nip_kepala" required>
+              </div>
+            </div>
           </div>
+          
+          <!-- Jadwal Ujian (Full Width) -->
           <div class="mb-3">
-            <label for="kelas" class="form-label">Kelas</label>
-            <select class="form-select" id="nama_kelas" name="nama_kelas" required>
-              <option value="">-- Pilih Kelas --</option>
-              @foreach($kelas as $kls)
-              <option value="{{ $kls->nama_kelas }}">{{ $kls->nama_kelas }}</option>
-              @endforeach
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="jenis_ujian" class="form-label">Jenis Ujian</label>
-            <select class="form-select" id="jenis_ujian" name="jenis_ujian" required>
-              <option value="">-- Pilih Jenis Ujian --</option>
-              <option value="UTS">UTS</option>
-              <option value="UAS">UAS</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
-            <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran" placeholder="Contoh: 2024/2025" required>
-          </div>
-          <div class="mb-3">
-            <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
-            <input type="text" class="form-control" id="nama_kepala" name="nama_kepala" required>
-          </div>
-          <div class="mb-3">
-            <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
-            <input type="text" class="form-control" id="nip_kepala" name="nip_kepala" required>
-          </div>
-          <div class="mb-3">
-            <label for="jadwal_ujian" class="form-label">Jadwal Ujian</label>
-            <small class="d-block text-muted">Klik "Tambah" untuk tambah jadwal:</small>
-
+            <label class="form-label">Jadwal Ujian</label>
+            <small class="d-block text-muted mb-2">Klik "Tambah" untuk menambahkan jadwal:</small>
+            
             <div id="jadwal-wrapper">
               <div class="row g-2 mb-2">
-                <div class="col-3">
+                <div class="col-md-3">
                   <input type="text" name="jadwal[0][hari]" class="form-control" placeholder="Hari (cth: Senin)">
                 </div>
-                <div class="col-3">
+                <div class="col-md-3">
                   <input type="date" name="jadwal[0][tanggal]" class="form-control">
                 </div>
-                <div class="col-3">
-                  <input type="text" name="jadwal[0][jam]" class="form-control" placeholder="Jam">
+                <div class="col-md-3">
+                  <input type="text" name="jadwal[0][jam]" class="form-control" placeholder="Jam (cth: 08.00-10.00)">
                 </div>
-                <div class="col-3">
-                  <input type="text" name="jadwal[0][mapel]" class="form-control" placeholder="Mapel">
+                <div class="col-md-3">
+                  <input type="text" name="jadwal[0][mapel]" class="form-control" placeholder="Mata Pelajaran">
                 </div>
               </div>
             </div>
-
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="tambahJadwal()">+ Tambah</button>
+            
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="tambahJadwal()">
+              <i class="fas fa-plus"></i> Tambah Jadwal
+            </button>
           </div>
-
-          <script>
-            let jadwalIndex = 1;
-
-            function tambahJadwal() {
-              const wrapper = document.getElementById('jadwal-wrapper');
-              const row = document.createElement('div');
-              row.classList.add('row', 'g-2', 'mb-2');
-              row.innerHTML = `
-        <div class="col-3">
-            <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control" placeholder="Hari">
         </div>
-        <div class="col-3">
-            <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control">
-        </div>
-        <div class="col-3">
-            <input type="text" name="jadwal[${jadwalIndex}][jam]" class="form-control" placeholder="Jam">
-        </div>
-        <div class="col-3">
-            <input type="text" name="jadwal[${jadwalIndex}][mapel]" class="form-control" placeholder="Mapel">
-        </div>
-    `;
-              wrapper.appendChild(row);
-              jadwalIndex++;
-            }
-          </script>
-
-
-
-        </div>
+        
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
           <button type="submit" class="btn btn-primary">
@@ -462,6 +451,32 @@
     </div>
   </div>
 </div>
+
+<script>
+  let jadwalIndex = 1;
+
+  function tambahJadwal() {
+    const wrapper = document.getElementById('jadwal-wrapper');
+    const row = document.createElement('div');
+    row.classList.add('row', 'g-2', 'mb-2');
+    row.innerHTML = `
+      <div class="col-md-3">
+        <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control" placeholder="Hari">
+      </div>
+      <div class="col-md-3">
+        <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="jadwal[${jadwalIndex}][jam]" class="form-control" placeholder="Jam">
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="jadwal[${jadwalIndex}][mapel]" class="form-control" placeholder="Mapel">
+      </div>
+    `;
+    wrapper.appendChild(row);
+    jadwalIndex++;
+  }
+</script>
 
 <!-- Modal Upload Massal -->
 <div class="modal fade" id="modalUploadMassal" tabindex="-1" aria-labelledby="modalUploadMassalLabel" aria-hidden="true">
