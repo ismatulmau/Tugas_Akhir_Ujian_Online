@@ -66,7 +66,7 @@
                                 <form method="POST" action="{{ route('login.submit') }}">
                                     @csrf
                                     <div class="mb-3">
-                                        <label class="form-label">Usename / Nomor Ujian</label>
+                                        <label class="form-label">Username</label>
                                         <input class="form-control form-control-lg" type="text" name="username"
                                             placeholder="Masukkan nama pengguna" required autofocus />
                                     </div>

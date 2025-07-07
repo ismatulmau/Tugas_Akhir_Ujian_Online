@@ -99,10 +99,18 @@ class KelasController extends Controller
     ]);
 
     try {
-        Excel::import(new KelasImport, $request->file('file'));
-        return redirect()->back()->with('success', 'Data berhasil diimpor.');
+        $import = new KelasImport();
+        Excel::import($import, $request->file('file'));
+
+        $total = $import->berhasil + $import->duplikat;
+        $message = "Import selesai. Total data: $total. 
+                    Berhasil: $import->berhasil. 
+                    Duplikat: $import->duplikat.";
+
+        return redirect()->back()->with('success', $message);
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
     }
 }
+
 }

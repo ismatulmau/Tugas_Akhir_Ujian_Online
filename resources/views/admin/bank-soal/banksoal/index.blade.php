@@ -308,7 +308,7 @@
 
             <div class="col-md-6">
               <label for="jurusan" class="form-label">Jurusan</label>
-              <select name="jurusan" id="jurusan_tambah" class="form-control" required>
+              <select name="jurusan" id="jurusan_tambah" class="form-select" required>
                 <option value="">-- Pilih Jurusan --</option>
                 @foreach($jurusan as $item)
                 <option value="{{ $item->jurusan }}">{{ $item->jurusan }}</option>
@@ -318,7 +318,7 @@
 
             <div class="col-md-6">
               <label for="level" class="form-label">Level Kelas</label>
-              <select class="form-control" name="level" id="level_tambah" required>
+              <select class="form-select" name="level" id="level_tambah" required>
                 <option value="">-- Pilih Level --</option>
                 @foreach(['X', 'XI', 'XII'] as $level)
                 <option value="{{ $level }}" {{ old('level') == $level ? 'selected' : '' }}>
@@ -330,7 +330,7 @@
 
             <div class="col-md-6">
               <label for="level">Kelas</label>
-              <select name="kode_kelas" id="kode_kelas_tambah" class="form-control" required>
+              <select name="kode_kelas" id="kode_kelas_tambah" class="form-select" required>
                 <option value="">-- Pilih Kelas --</option>
                 <option value="ALL">Semua Kelas</option>
                 @foreach($kelas as $kls)
