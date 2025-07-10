@@ -73,7 +73,7 @@
                     <div class="collapse {{ request()->is('status-ujian*') ? 'show' : '' }}" id="forms">
                         <ul class="nav nav-collapse">
                             <li class="nav-item {{ request()->routeIs('setting-ujian.index') ? 'active' : '' }}">
-                                <a href="{{ route('setting-ujian.index') }}" class="nav-link"><span class="sub-item">Kelola Ujian</span></a>
+                                <a href="{{ route('setting-ujian.index') }}" class="nav-link"><span class="sub-item">Setting Ujian</span></a>
                             </li>
                             <li class="nav-item {{ request()->routeIs('jadwal.ujian') ? 'active' : '' }}">
                                 <a href="{{ route('jadwal.ujian') }}" class="nav-link"><span class="sub-item">Jadwal Ujian</span></a>

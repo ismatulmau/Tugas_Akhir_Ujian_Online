@@ -177,7 +177,7 @@ public function toggleStatus($id_bank_soal)
     $banksoal->settingUjian->save();
 }
 
-    return back()->with('success', 'Bank soal dinonaktifkan dan setting ujian di-nonaktifkan.');
+    return back()->with('success', 'Bank soal dinonaktifkan .');
 }
 }
 

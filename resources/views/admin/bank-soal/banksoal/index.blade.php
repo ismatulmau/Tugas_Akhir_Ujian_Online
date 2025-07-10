@@ -68,10 +68,10 @@
                 <td>{{ $banksoal->nama_bank_soal }}</td>
                 <td>{{ $banksoal->mapel->nama_mapel ?? '-' }}</td>
                 <td>
-  {{ $banksoal->level ?? '-' }} - 
-  {{ $banksoal->kode_kelas == 'ALL' ? 'ALL' : ($banksoal->kelas->kode_kelas ?? '-') }}<br>
-  <small class="text-muted">{{ $banksoal->jurusan ?? '' }}</small>
-</td>
+                  {{ $banksoal->level ?? '-' }} -
+                  {{ $banksoal->kode_kelas == 'ALL' ? 'ALL' : ($banksoal->kelas->nama_kelas ?? '-') }}<br>
+                  <small class="text-muted">{{ $banksoal->jurusan ?? '' }}</small>
+                </td>
 
                 <td>
                   <small>Opsi: {{ $banksoal->opsi_jawaban }}</small><br>
@@ -164,7 +164,7 @@
 
                           <div class="col-md-6">
                             <label for="jurusan" class="form-label">Jurusan</label>
-                            <select name="jurusan" id="jurusan" class="form-control" required>
+                            <select name="jurusan" id="jurusan" class="form-select" required>
                               <option value="">-- Pilih Jurusan --</option>
                               @foreach($jurusan as $jrs)
                               <option value="{{ $jrs->jurusan }}" {{ $banksoal->jurusan == $jrs->jurusan ? 'selected' : '' }}>
@@ -176,10 +176,10 @@
 
                           <div class="col-md-6">
                             <label for="level" class="form-label">Level Kelas</label>
-                            <select class="form-control" name="level" id="level" required>
+                            <select class="form-select" name="level" id="level" required>
                               <option value="">-- Pilih Level --</option>
                               @foreach(['X', 'XI', 'XII'] as $level)
-                              <option value="{{ $level }}" {{ old('level') == $level ? 'selected' : '' }}>
+                              <option value="{{ $level }}" {{ $banksoal->level == $level ? 'selected' : '' }}>
                                 {{ $level }}
                               </option>
                               @endforeach
@@ -188,23 +188,20 @@
 
                           <div class="col-md-6">
                             <label for="level">Kelas</label>
-                            <select name="kode_kelas" id="kode_kelas" class="form-control" required>
+                            <select name="kode_kelas" id="kode_kelas" class="form-select" required>
                               <option value="">-- Pilih Kelas --</option>
-                              <option value="ALL">Semua Kelas</option>
+                              <option value="ALL" {{ $banksoal->kode_kelas == 'ALL' ? 'selected' : '' }}>Semua Kelas</option>
                               @foreach($kelas as $kls)
                               <option
                                 value="{{ $kls->kode_kelas }}"
                                 data-jurusan="{{ $kls->jurusan }}"
-                                data-level="{{ $kls->level }}">
-                                {{ $kls->kode_kelas }}
+                                data-level="{{ $kls->level }}"
+                                {{ $banksoal->kode_kelas == $kls->kode_kelas ? 'selected' : '' }}>
+                                {{ $kls->nama_kelas }}
                               </option>
                               @endforeach
                             </select>
-
                           </div>
-
-
-
                           <div class="col-md-6">
                             <label for="opsi_jawaban" class="form-label">Opsi Jawaban</label>
                             <select class="form-select" name="opsi_jawaban" required>
@@ -338,7 +335,7 @@
                   value="{{ $kls->kode_kelas }}"
                   data-jurusan="{{ $kls->jurusan }}"
                   data-level="{{ $kls->level }}">
-                  {{ $kls->kode_kelas }}
+                  {{ $kls->nama_kelas }}
                 </option>
                 @endforeach
               </select>
@@ -370,7 +367,7 @@
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const jurusanSelect = document.getElementById('jurusan_tambah');
     const levelSelect = document.getElementById('level_tambah');
     const kelasSelect = document.getElementById('kode_kelas_tambah');
