@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SettingUjian;
 use App\Models\BankSoal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SettingUjianController extends Controller
 {
@@ -20,25 +21,29 @@ class SettingUjianController extends Controller
 }
 
 
-    public function store(Request $request)
+public function store(Request $request)
 {
+    // Validasi input tanpa token karena akan dibuat otomatis
     $request->validate([
-        'id_bank_soal' => 'required|exists:bank_soals,id_bank_soal',
-        'jenis_tes' => 'required',
-        'semester' => 'required',
-        'sesi' => 'required',
-        'waktu_mulai' => 'required|date',
-        'waktu_selesai' => 'required|date|after:waktu_mulai',
-        'token' => 'required|unique:setting_ujians,token',
+        'id_bank_soal'   => 'required|exists:bank_soals,id_bank_soal',
+        'jenis_tes'      => 'required|string',
+        'semester'       => 'required|integer',
+        'sesi'           => 'required|string',
+        'waktu_mulai'    => 'required|date',
+        'waktu_selesai'  => 'required|date|after:waktu_mulai',
     ], [
-        'token.unique' => 'Token sudah digunakan, silakan gunakan token lain.',
         'required' => 'Kolom :attribute wajib diisi.',
-        'after' => 'Waktu selesai harus setelah waktu mulai.',
+        'after'    => 'Waktu selesai harus setelah waktu mulai.',
     ]);
 
-    try {
-        $durasi = (strtotime($request->waktu_selesai) - strtotime($request->waktu_mulai)) / 60;
+    // Hitung durasi dalam menit
+    $durasi = (strtotime($request->waktu_selesai) - strtotime($request->waktu_mulai)) / 60;
 
+    // Fungsi untuk generate token unik
+    $token = $this->generateUniqueToken();
+
+    try {
+        // Simpan data ke database
         SettingUjian::create([
             'id_bank_soal'   => $request->id_bank_soal,
             'jenis_tes'      => $request->jenis_tes,
@@ -47,13 +52,23 @@ class SettingUjianController extends Controller
             'waktu_mulai'    => $request->waktu_mulai,
             'waktu_selesai'  => $request->waktu_selesai,
             'durasi'         => $durasi,
-            'token'          => $request->token,
+            'token'          => $token,
         ]);
 
-        return back()->with('success', 'Ujian berhasil disetting.');
+        return redirect()->back()->with('success', 'Ujian berhasil disetting dengan token: ' . $token);
     } catch (\Exception $e) {
-        return back()->withErrors(['error' => 'Gagal menyimpan setting ujian: ' . $e->getMessage()]);
+        return redirect()->back()->withErrors(['error' => 'Gagal menyimpan setting ujian: ' . $e->getMessage()]);
     }
+}
+
+// Fungsi untuk generate token unik 6 karakter (bisa kamu modifikasi sesuai format)
+private function generateUniqueToken($length = 6)
+{
+    do {
+        $token = strtoupper(Str::random($length)); // contoh hasil: AB12CD
+    } while (SettingUjian::where('token', $token)->exists());
+
+    return $token;
 }
 
     public function update(Request $request, $id_sett_ujian)

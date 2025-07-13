@@ -28,6 +28,12 @@ class UjianController extends Controller
         ->with('error', 'Ujian ini tidak sesuai dengan jurusan, kelas atau tingkat Anda.');
 }
 
+// ✅ Cek kesesuaian sesi ujian
+    if ($ujian->sesi !== $siswa->sesi_ujian) {
+        return redirect()->route('siswa.data-peserta')
+            ->with('error', 'Sesi ujian Anda tidak sesuai dengan sesi ujian yang dijadwalkan.');
+    }
+
 
     if ($ujian->status !== 'aktif' || $ujian->bankSoal->status !== 'aktif') {
         return redirect()->route('siswa.data-peserta')
@@ -49,8 +55,8 @@ class UjianController extends Controller
     if (session()->has($sessionKey)) {
         $soalIds = session($sessionKey);
         $soals = \App\Models\Soal::whereIn('id_soal', $soalIds)->get()->sortBy(function ($soal) use ($soalIds) {
-            return array_search($soal->id_soal, $soalIds);
-        });
+    return array_search($soal->id_soal, $soalIds);
+})->values();
     } else {
         $soals = $ujian->bankSoal->soals()->inRandomOrder()->limit($jmlSoal)->get();
         $soalIds = $soals->pluck('id_soal')->toArray();

@@ -11,6 +11,8 @@
 </div>
 @endsection
 
+@php use Illuminate\Support\Str; @endphp
+
 @section('content')
 
 @if(session('success'))
@@ -194,7 +196,7 @@
           <li>Jika ingin berganti <strong>Sesi Ujian</strong>, silahkan <strong>nonAktifkan</strong> terlebih dahulu Bank Soal, kemudian <strong>Aktifkan</strong> kembali dan atur ulang jadwalnya.</li>
           <li>Beberapa ujian (untuk level dan jurusan berbeda) bisa diatur dalam waktu bersamaan.</li>
           <li>Apabila satu level memiliki beberapa ujian bersamaan (untuk level dan jurusan yang sama), maka peserta <strong>tidak dapat mengikuti ujian</strong> (*terlambat mengikuti ujian).</li>
-          <li>Daftar di atas merupakan paket ujian yang telah <strong>diaktifkan oleh admin</strong>. Silakan melakukan pengaturan daftar ujian dengan mengklik tombol <strong>‘Set’</strong> pada menu jadwal.</li>
+          <li>Daftar di atas merupakan paket ujian yang telah <strong>diaktifkan oleh admin</strong>. Silakan melakukan pengaturan daftar ujian dengan mengklik tombol <strong>‘Pengaturan Ujian’</strong> pada kolom jadwal.</li>
           <li>Jika ingin berganti sesi, silahkan atur ulang dengan mengedit jadwalnya.</li>
         </ul>
       </div>
@@ -237,7 +239,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label">Token Ujian</label>
-              <input type="text" name="token" class="form-control" required placeholder="Contoh: UJIAN2024">
+              <input type="text" name="token" class="form-control" value="{{ strtoupper(Str::random(6)) }}" readonly>
             </div>
             <div class="col-md-6">
               <label class="form-label">Waktu Mulai</label>

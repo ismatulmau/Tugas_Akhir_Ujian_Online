@@ -164,7 +164,7 @@
 
                           <div class="col-md-6">
                             <label for="jurusan" class="form-label">Jurusan</label>
-                            <select name="jurusan" id="jurusan" class="form-select" required>
+                            <select name="jurusan" id="jurusan-{{ $banksoal->id_bank_soal }}" class="form-select jurusan-edit" data-id="{{ $banksoal->id_bank_soal }}">
                               <option value="">-- Pilih Jurusan --</option>
                               @foreach($jurusan as $jrs)
                               <option value="{{ $jrs->jurusan }}" {{ $banksoal->jurusan == $jrs->jurusan ? 'selected' : '' }}>
@@ -176,7 +176,7 @@
 
                           <div class="col-md-6">
                             <label for="level" class="form-label">Level Kelas</label>
-                            <select class="form-select" name="level" id="level" required>
+                            <select class="form-select level-edit" name="level" id="level-{{ $banksoal->id_bank_soal }}" data-id="{{ $banksoal->id_bank_soal }}">
                               <option value="">-- Pilih Level --</option>
                               @foreach(['X', 'XI', 'XII'] as $level)
                               <option value="{{ $level }}" {{ $banksoal->level == $level ? 'selected' : '' }}>
@@ -188,19 +188,27 @@
 
                           <div class="col-md-6">
                             <label for="level">Kelas</label>
-                            <select name="kode_kelas" id="kode_kelas" class="form-select" required>
-                              <option value="">-- Pilih Kelas --</option>
-                              <option value="ALL" {{ $banksoal->kode_kelas == 'ALL' ? 'selected' : '' }}>Semua Kelas</option>
-                              @foreach($kelas as $kls)
-                              <option
-                                value="{{ $kls->kode_kelas }}"
-                                data-jurusan="{{ $kls->jurusan }}"
-                                data-level="{{ $kls->level }}"
-                                {{ $banksoal->kode_kelas == $kls->kode_kelas ? 'selected' : '' }}>
-                                {{ $kls->nama_kelas }}
-                              </option>
-                              @endforeach
-                            </select>
+                            <select
+  name="kode_kelas"
+  id="kode_kelas-{{ $banksoal->id_bank_soal }}"
+  class="form-select"
+  data-id="{{ $banksoal->id_bank_soal }}"
+  data-selected="{{ $banksoal->kode_kelas }}"
+  required>
+  <option value="">-- Pilih Kelas --</option>
+  <option value="ALL" {{ $banksoal->kode_kelas == 'ALL' ? 'selected' : '' }}>Semua Kelas</option>
+  @foreach($kelas as $kls)
+    <option
+      value="{{ $kls->kode_kelas }}"
+      data-jurusan="{{ $kls->jurusan }}"
+      data-level="{{ $kls->level }}"
+      {{ $banksoal->kode_kelas == $kls->kode_kelas ? 'selected' : '' }}>
+      {{ $kls->nama_kelas }}
+    </option>
+  @endforeach
+</select>
+
+
                           </div>
                           <div class="col-md-6">
                             <label for="opsi_jawaban" class="form-label">Opsi Jawaban</label>
@@ -394,6 +402,51 @@
 
     jurusanSelect.addEventListener('change', filterKelas);
     levelSelect.addEventListener('change', filterKelas);
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Untuk setiap modal edit
+    document.querySelectorAll('.jurusan-edit').forEach((jurusanSelect) => {
+      const id = jurusanSelect.dataset.id;
+      const levelSelect = document.getElementById('level-' + id);
+      const kelasSelect = document.getElementById('kode_kelas-' + id);
+
+      // Simpan semua opsi awal sebagai referensi
+      const allOptions = Array.from(kelasSelect.options).map(opt => opt.cloneNode(true));
+
+      function filterKelasEdit() {
+        const selectedJurusan = jurusanSelect.value;
+        const selectedLevel = levelSelect.value;
+
+        kelasSelect.innerHTML = `
+          <option value="">-- Pilih Kelas --</option>
+          <option value="ALL">Semua Kelas</option>
+        `;
+
+        allOptions.forEach(option => {
+          const jurusan = option.dataset.jurusan;
+          const level = option.dataset.level;
+
+          if (jurusan === selectedJurusan && level === selectedLevel) {
+            kelasSelect.appendChild(option);
+          }
+        });
+
+        // Pilih ulang kelas sebelumnya jika masih sesuai
+        const selected = kelasSelect.getAttribute('data-selected');
+        if (selected) {
+          kelasSelect.value = selected;
+        }
+      }
+
+      jurusanSelect.addEventListener('change', filterKelasEdit);
+      levelSelect.addEventListener('change', filterKelasEdit);
+
+      // Trigger filter saat halaman dimuat (agar tampil defaultnya)
+      filterKelasEdit();
+    });
   });
 </script>
 

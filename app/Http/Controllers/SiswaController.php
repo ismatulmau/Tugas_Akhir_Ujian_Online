@@ -17,19 +17,19 @@ use App\Exports\SiswaTemplateExport;
 class SiswaController extends Controller
 {
     public function index()
-{
-    $kelas = Kelas::all();
-    $jurusan = Kelas::select('jurusan')->distinct()->orderBy('jurusan')->get();
+    {
+        $kelas = Kelas::all();
+        $jurusan = Kelas::select('jurusan')->distinct()->orderBy('jurusan')->get();
 
-    $siswas = Siswa::with(['kelas' => function($query) {
+        $siswas = Siswa::with(['kelas' => function ($query) {
             $query->orderBy('nama_kelas');
         }])
-        ->orderByRaw("FIELD(level, 'X', 'XI', 'XII')")
-        ->orderBy('nama_siswa')
-        ->get();
+            ->orderByRaw("FIELD(level, 'X', 'XI', 'XII')")
+            ->orderBy('nama_siswa')
+            ->get();
 
-    return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan'));
-}
+        return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan'));
+    }
 
 
     public function store(Request $request)
@@ -69,11 +69,11 @@ class SiswaController extends Controller
 
         $gambarPath = null;
         if ($request->hasFile('gambar')) {
-    $file = $request->file('gambar');
-    $namaAsli = $file->getClientOriginalName();
-    $path = $file->storeAs('siswa_images', $namaAsli, 'public');
-    $gambarPath = $path;
-}
+            $file = $request->file('gambar');
+            $namaAsli = $file->getClientOriginalName();
+            $path = $file->storeAs('siswa_images', $namaAsli, 'public');
+            $gambarPath = $path;
+        }
 
         Siswa::create([
             'nama_siswa' => $request->nama_siswa,
@@ -139,17 +139,17 @@ class SiswaController extends Controller
         }
 
         if ($request->hasFile('gambar')) {
-    // Hapus gambar lama
-    if ($siswa->gambar && Storage::disk('public')->exists($siswa->gambar)) {
-        Storage::disk('public')->delete($siswa->gambar);
-    }
+            // Hapus gambar lama
+            if ($siswa->gambar && Storage::disk('public')->exists($siswa->gambar)) {
+                Storage::disk('public')->delete($siswa->gambar);
+            }
 
-    // Simpan gambar baru
-    $file = $request->file('gambar');
-    $namaAsli = $file->getClientOriginalName();
-    $path = $file->storeAs('siswa_images', $namaAsli, 'public');
-    $data['gambar'] = $path;
-}
+            // Simpan gambar baru
+            $file = $request->file('gambar');
+            $namaAsli = $file->getClientOriginalName();
+            $path = $file->storeAs('siswa_images', $namaAsli, 'public');
+            $data['gambar'] = $path;
+        }
 
         $siswa->update($data);
 
@@ -158,47 +158,47 @@ class SiswaController extends Controller
 
 
     public function destroy($id_siswa)
-{
-    $siswa = Siswa::findOrFail($id_siswa);
-    
-    // Hapus gambar dari storage jika ada
-    if ($siswa->gambar) {
-        $gambarPath = public_path('storage/' . $siswa->gambar);
-        if (file_exists($gambarPath)) {
-            unlink($gambarPath);
-        }
-    }
-    
-    $siswa->delete();
+    {
+        $siswa = Siswa::findOrFail($id_siswa);
 
-    return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus.');
-}
+        // Hapus gambar dari storage jika ada
+        if ($siswa->gambar) {
+            $gambarPath = public_path('storage/' . $siswa->gambar);
+            if (file_exists($gambarPath)) {
+                unlink($gambarPath);
+            }
+        }
+
+        $siswa->delete();
+
+        return redirect()->route('siswa.index')->with('success', 'Data siswa berhasil dihapus.');
+    }
 
     public function downloadTemplate()
-{
-    return Excel::download(new SiswaTemplateExport, 'Template_Import_Siswa.xlsx');
-}
+    {
+        return Excel::download(new SiswaTemplateExport, 'Template_Import_Siswa.xlsx');
+    }
 
     public function import(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:xlsx,xls',
-    ]);
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
 
-    try {
-        $import = new SiswaImport();
-        Excel::import($import, $request->file('file'));
+        try {
+            $import = new SiswaImport();
+            Excel::import($import, $request->file('file'));
 
-        $total = $import->berhasil + $import->duplikat;
-        $message = "Import selesai. Total data: $total. 
+            $total = $import->berhasil + $import->duplikat;
+            $message = "Import selesai. Total data: $total. 
                     Berhasil: $import->berhasil. 
                     Duplikat: $import->duplikat.";
 
-        return redirect()->back()->with('success', $message);
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+        }
     }
-}
 
     //upload foto siswa
     public function uploadGambarMassal(Request $request)
@@ -237,103 +237,103 @@ class SiswaController extends Controller
         return back()->with('success', "Semua gambar berhasil diupload dan disimpan ke database ($berhasil foto).");
     }
 
-public function cetakKartu(Request $request)
-{
-    $request->validate([
-        'jurusan' => 'required',
-        'nama_kelas' => 'required',
-        'jenis_ujian' => 'required',
-        'tahun_pelajaran' => 'required|string',
-        'nama_kepala' => 'required|string',
-        'nip_kepala' => 'required|string',
-        'jadwal' => 'array',
-        'jadwal.*.hari' => 'nullable|string',
-        'jadwal.*.tanggal' => 'nullable|date',
-        'jadwal.*.jam' => 'nullable|string',
-        'jadwal.*.mapel' => 'nullable|string',
-    ]);
+    public function cetakKartu(Request $request)
+    {
+        $request->validate([
+            'jurusan' => 'required',
+            'nama_kelas' => 'required',
+            'jenis_ujian' => 'required',
+            'tahun_pelajaran' => 'required|string',
+            'nama_kepala' => 'required|string',
+            'nip_kepala' => 'required|string',
+            'jadwal' => 'array',
+            'jadwal.*.hari' => 'nullable|string',
+            'jadwal.*.tanggal' => 'nullable|date',
+            'jadwal.*.jam' => 'nullable|string',
+            'jadwal.*.mapel' => 'nullable|string',
+        ]);
 
-    $query = Siswa::query();
+        $query = Siswa::query();
 
-    if ($request->jurusan !== 'all') {
-        $query->where('jurusan', $request->jurusan);
+        if ($request->jurusan !== 'all') {
+            $query->where('jurusan', $request->jurusan);
+        }
+
+        if ($request->nama_kelas !== 'all') {
+            $query->where('kode_kelas', function ($sub) use ($request) {
+                $sub->select('kode_kelas')->from('kelas')->where('nama_kelas', $request->nama_kelas);
+            });
+        }
+
+        $siswas = $query->get();
+
+        if ($siswas->isEmpty()) {
+            return back()->with('error', 'Tidak ada data siswa untuk kriteria tersebut');
+        }
+
+        $jadwalUjian = collect($request->jadwal)
+            ->filter(fn($item) => !empty($item['hari']) || !empty($item['tanggal']) || !empty($item['jam']) || !empty($item['mapel']))
+            ->groupBy(function ($item) {
+                $hari = $item['hari'] ?? '-';
+                $tanggal = $item['tanggal'] ?? '-';
+                return $hari . '|' . $tanggal;
+            });
+
+
+        $pdf = Pdf::loadView('siswa.cetak-kartu', [
+            'siswas' => $siswas,
+            'jenis_ujian' => $request->jenis_ujian,
+            'tahun_pelajaran' => $request->tahun_pelajaran,
+            'nama_kepala' => $request->nama_kepala,
+            'nip_kepala' => $request->nip_kepala,
+            'jadwalUjian' => $jadwalUjian,
+        ]);
+
+        return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
     }
 
-    if ($request->nama_kelas !== 'all') {
-    $query->where('kode_kelas', function ($sub) use ($request) {
-        $sub->select('kode_kelas')->from('kelas')->where('nama_kelas', $request->nama_kelas);
-    });
-}
+    public function dataPeserta()
+    {
+        $siswa = Auth::guard('siswa')->user();
+        $siswa->load('kelas');
 
-    $siswas = $query->get();
+        // Ambil token dari ujian aktif yang cocok dengan jurusan, level dan kelas siswa
+        $ujian = \App\Models\SettingUjian::with('bankSoal')
+            ->whereHas('bankSoal', function ($query) use ($siswa) {
+                $query->where('jurusan', $siswa->jurusan)
+                    ->where('level', $siswa->level)
+                    ->where(function ($q) use ($siswa) {
+                        $q->where('kode_kelas', $siswa->kode_kelas)
+                            ->orWhere('kode_kelas', 'ALL');
+                    });
+            })
+            ->where('status', 'aktif')
+            ->first();
 
-    if ($siswas->isEmpty()) {
-        return back()->with('error', 'Tidak ada data siswa untuk kriteria tersebut');
+        $token_ujian = $ujian->token ?? null;
+
+        return view('siswa.data-peserta', compact('siswa', 'token_ujian'));
     }
 
-   $jadwalUjian = collect($request->jadwal)
-    ->filter(fn($item) => !empty($item['hari']) || !empty($item['tanggal']) || !empty($item['jam']) || !empty($item['mapel']))
-    ->groupBy(function ($item) {
-        $hari = $item['hari'] ?? '-';
-        $tanggal = $item['tanggal'] ?? '-';
-        return $hari . '|' . $tanggal;
-    });
 
+    public function dataUjian(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+        ]);
 
-    $pdf = Pdf::loadView('siswa.cetak-kartu', [
-        'siswas' => $siswas,
-        'jenis_ujian' => $request->jenis_ujian,
-        'tahun_pelajaran' => $request->tahun_pelajaran,
-        'nama_kepala' => $request->nama_kepala,
-        'nip_kepala' => $request->nip_kepala,
-        'jadwalUjian' => $jadwalUjian,
-    ]);
+        $token = $request->token;
 
-    return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
-}
+        $ujian = SettingUjian::with('bankSoal')->where('token', $token)->first();
 
-public function dataPeserta()
-{
-    $siswa = Auth::guard('siswa')->user();
-    $siswa->load('kelas');
+        if (!$ujian) {
+            return redirect()->back()->with('error', 'Token tidak valid!');
+        }
 
-    // Ambil token dari ujian aktif yang cocok dengan jurusan, level dan kelas siswa
-    $ujian = \App\Models\SettingUjian::with('bankSoal')
-        ->whereHas('bankSoal', function ($query) use ($siswa) {
-            $query->where('jurusan', $siswa->jurusan)
-                  ->where('level', $siswa->level)
-                  ->where(function ($q) use ($siswa) {
-                      $q->where('kode_kelas', $siswa->kode_kelas)
-                        ->orWhere('kode_kelas', 'ALL');
-                  });
-        })
-        ->where('status', 'aktif')
-        ->first();
+        $id_siswa = Auth::guard('siswa')->user()->id_siswa;
 
-    $token_ujian = $ujian->token ?? null;
-
-    return view('siswa.data-peserta', compact('siswa', 'token_ujian'));
-}
-
-
-public function dataUjian(Request $request)
-{
-    $request->validate([
-        'token' => 'required',
-    ]);
-
-    $token = $request->token;
-
-    $ujian = SettingUjian::with('bankSoal')->where('token', $token)->first();
-
-    if (!$ujian) {
-        return redirect()->back()->with('error', 'Token tidak valid!');
+        // Jika belum mengerjakan, tampilkan view data ujian
+        session(['ujian_terverifikasi' => $ujian->id_sett_ujian]);
+        return view('siswa.data-ujian', compact('ujian'));
     }
-
-    $id_siswa = Auth::guard('siswa')->user()->id_siswa;
-
-    // Jika belum mengerjakan, tampilkan view data ujian
-   session(['ujian_terverifikasi' => $ujian->id_sett_ujian]);
-return view('siswa.data-ujian', compact('ujian'));
-}
 }

@@ -254,164 +254,181 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const questions = document.querySelectorAll('.question');
-        const nextButtons = document.querySelectorAll('.next-question');
-        const skipButtons = document.querySelectorAll('.prev-question');
-        const raguButtons = document.querySelectorAll('.ragu-question');
-        const navButtons = document.querySelectorAll('.question-nav');
-        const form = document.getElementById('exam-form');
-        const timerElements = document.querySelectorAll('[id^="time-remaining-"]');
+document.addEventListener('DOMContentLoaded', function () {
+    const questions = document.querySelectorAll('.question');
+    const nextButtons = document.querySelectorAll('.next-question');
+    const skipButtons = document.querySelectorAll('.prev-question');
+    const raguButtons = document.querySelectorAll('.ragu-question');
+    const navButtons = document.querySelectorAll('.question-nav');
+    const form = document.getElementById('exam-form');
+    const timerElements = document.querySelectorAll('[id^="time-remaining-"]');
+    const examDurationMinutes = {{ $ujian->durasi }};
+    const examDurationMillis = examDurationMinutes * 60 * 1000;
 
-        const examDurationMinutes = {{ $ujian->durasi }};
+    // ========== TIMER ==========
+    function updateTimer() {
+        const now = new Date().getTime();
+        const distance = examEndTime - now;
 
-        const examDurationMillis = examDurationMinutes * 60 * 1000;
-
-        // Timer
-        // let examStartTime = localStorage.getItem('examStartTime');
-        // if (!examStartTime) {
-        //     examStartTime = new Date().getTime();
-        //     localStorage.setItem('examStartTime', examStartTime);
-        // }
-        // const examEndTime = parseInt(examStartTime) + examDurationMillis;
-        // let timerInterval;
-
-        function updateTimer() {
-            const now = new Date().getTime();
-            const distance = examEndTime - now;
-
-            if (distance < 0) {
-                clearInterval(timerInterval);
-                Swal.fire({
-                    title: 'Waktu Habis!',
-                    text: "Waktu ujian Anda telah habis. Jawaban Anda akan disimpan secara otomatis.",
-                    icon: 'info',
-                    confirmButtonText: 'Oke'
-                }).then(() => {
-                    clearExamStorage();
-                    form.submit();
-                });
-                return;
-            }
-
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            timerElements.forEach(timerElement => {
-                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            });
-        }
-
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 1000);
-
-        function showQuestion(index) {
-            questions.forEach((question, i) => {
-                question.style.display = i === index ? 'block' : 'none';
-            });
-
-            navButtons.forEach((btn, i) => {
-                btn.classList.toggle('active', i === index);
-            });
-
-            localStorage.setItem('lastQuestionIndex', index);
-        }
-
-        // Kembalikan posisi terakhir
-        let lastIndex = parseInt(localStorage.getItem('lastQuestionIndex')) || 0;
-        showQuestion(lastIndex);
-
-        navButtons.forEach((btn, index) => {
-            btn.addEventListener('click', () => showQuestion(index));
-        });
-
-        nextButtons.forEach((btn, index) => {
-            btn.addEventListener('click', () => showQuestion(index + 1));
-        });
-
-        skipButtons.forEach((btn, index) => {
-            btn.addEventListener('click', () => showQuestion(index));
-        });
-
-        // Ragu-ragu
-        raguButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const currentQuestion = this.closest('.question');
-                const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
-                const navButton = navButtons[currentIndex];
-
-                navButton.classList.toggle('btn-warning');
-                navButton.classList.toggle('btn-outline-primary');
-
-                this.classList.add('btn-outline-warning');
-                this.textContent = 'Ragu!';
-                setTimeout(() => {
-                    this.classList.remove('btn-outline-warning');
-                    this.textContent = 'Ragu-ragu';
-                }, 1000);
-            });
-        });
-
-        // Simpan jawaban ke localStorage
-        form.addEventListener('change', function(e) {
-            if (e.target.matches('.form-check-input')) {
-                const soalId = e.target.name.match(/\[(\d+)\]/)[1];
-                localStorage.setItem(`jawaban_${soalId}`, e.target.value);
-
-                const questionId = e.target.closest('.question').id;
-                const questionIndex = parseInt(questionId.split('-')[1]);
-                const navButton = navButtons[questionIndex];
-
-                navButton.classList.add('btn-primary');
-                navButton.classList.remove('btn-outline-primary', 'btn-warning');
-            }
-        });
-
-        // Pulihkan jawaban dari localStorage saat halaman dimuat
-        document.querySelectorAll('.form-check-input').forEach(input => {
-            const soalId = input.name.match(/\[(\d+)\]/)[1];
-            const savedAnswer = localStorage.getItem(`jawaban_${soalId}`);
-            if (savedAnswer && input.value === savedAnswer) {
-                input.checked = true;
-
-                const questionIndex = parseInt(input.closest('.question').id.split('-')[1]);
-                const navButton = document.querySelector(`.question-nav[data-index="${questionIndex}"]`);
-                navButton.classList.add('btn-primary');
-                navButton.classList.remove('btn-outline-primary', 'btn-warning');
-            }
-        });
-
-        function clearExamStorage() {
-            // localStorage.removeItem('examStartTime');
-            localStorage.removeItem('lastQuestionIndex');
-            Object.keys(localStorage).forEach(key => {
-                if (key.startsWith('jawaban_')) {
-                    localStorage.removeItem(key);
-                }
-            });
-        }
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
+        if (distance < 0) {
+            clearInterval(timerInterval);
             Swal.fire({
-                title: 'Konfirmasi',
-                html: `Apakah Anda yakin ingin menyimpan jawaban?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#dc3545',
-                confirmButtonText: 'Ya, Simpan!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    clearExamStorage();
-                    form.submit();
-                }
+                title: 'Waktu Habis!',
+                text: "Waktu ujian Anda telah habis. Jawaban Anda akan disimpan secara otomatis.",
+                icon: 'info',
+                confirmButtonText: 'Oke'
+            }).then(() => {
+                clearExamStorage();
+                form.submit();
             });
+            return;
+        }
+
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        timerElements.forEach(timerElement => {
+            timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        });
+    }
+
+    updateTimer();
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    // ========== TAMPILKAN SOAL BERDASARKAN INDEX ==========
+    function showQuestion(index) {
+        questions.forEach((question, i) => {
+            question.style.display = i === index ? 'block' : 'none';
+        });
+
+        navButtons.forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+
+        localStorage.setItem('lastQuestionIndex', index);
+    }
+
+    // ========== NAVIGASI ==========
+    let lastIndex = parseInt(localStorage.getItem('lastQuestionIndex')) || 0;
+    showQuestion(lastIndex);
+
+    navButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => showQuestion(index));
+    });
+
+    nextButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => showQuestion(index + 1));
+    });
+
+    skipButtons.forEach((btn, index) => {
+        btn.addEventListener('click', () => showQuestion(index));
+    });
+
+    // ========== SIMPAN & PULIHKAN JAWABAN ==========
+    form.addEventListener('change', function (e) {
+        if (e.target.matches('.form-check-input')) {
+            const soalId = e.target.name.match(/\[(\d+)\]/)[1];
+            localStorage.setItem(`jawaban_${soalId}`, e.target.value);
+
+            const questionId = e.target.closest('.question').id;
+            const questionIndex = parseInt(questionId.split('-')[1]);
+            const navButton = navButtons[questionIndex];
+
+            navButton.classList.add('btn-primary');
+            navButton.classList.remove('btn-outline-primary', 'btn-warning');
+        }
+    });
+
+    document.querySelectorAll('.form-check-input').forEach(input => {
+        const soalId = input.name.match(/\[(\d+)\]/)[1];
+        const savedAnswer = localStorage.getItem(`jawaban_${soalId}`);
+        if (savedAnswer && input.value === savedAnswer) {
+            input.checked = true;
+
+            const questionIndex = parseInt(input.closest('.question').id.split('-')[1]);
+            const navButton = document.querySelector(`.question-nav[data-index="${questionIndex}"]`);
+            navButton.classList.add('btn-primary');
+            navButton.classList.remove('btn-outline-primary', 'btn-warning');
+        }
+    });
+
+    // ========== FITUR RAGU-RAGU ==========
+    function toggleRagu(soalId) {
+        let raguList = JSON.parse(localStorage.getItem('raguList')) || [];
+
+        if (raguList.includes(soalId)) {
+            raguList = raguList.filter(id => id !== soalId);
+        } else {
+            raguList.push(soalId);
+        }
+
+        localStorage.setItem('raguList', JSON.stringify(raguList));
+    }
+
+    raguButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const currentQuestion = this.closest('.question');
+            const currentIndex = parseInt(currentQuestion.id.split('-')[1]);
+            const navButton = navButtons[currentIndex];
+            const soalId = questions[currentIndex].querySelector('.form-check-input')?.name.match(/\[(\d+)\]/)[1];
+
+            if (navButton.classList.contains('btn-warning')) {
+                navButton.classList.remove('btn-warning');
+                navButton.classList.add('btn-outline-primary');
+            } else {
+                navButton.classList.add('btn-warning');
+                navButton.classList.remove('btn-outline-primary');
+            }
+
+            toggleRagu(soalId);
         });
     });
+
+    // Pulihkan tanda ragu-ragu dari localStorage
+const raguList = JSON.parse(localStorage.getItem('raguList')) || [];
+
+questions.forEach((question, index) => {
+    const soalId = question.querySelector('.form-check-input')?.name.match(/\[(\d+)\]/)[1];
+    if (raguList.includes(soalId)) {
+        const navButton = navButtons[index];
+        navButton.classList.add('btn-warning');
+        navButton.classList.remove('btn-outline-primary');
+    }
+});
+    // ========== HAPUS SEMUA DATA DARI LOCALSTORAGE SETELAH SUBMIT ==========
+    function clearExamStorage() {
+        localStorage.removeItem('lastQuestionIndex');
+        localStorage.removeItem('raguList');
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('jawaban_')) {
+                localStorage.removeItem(key);
+            }
+        });
+    }
+
+    // ========== KONFIRMASI SUBMIT ==========
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Konfirmasi',
+            html: `Apakah Anda yakin ingin menyimpan jawaban?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                clearExamStorage();
+                form.submit();
+            }
+        });
+    });
+});
 </script>
+
 
 @endsection

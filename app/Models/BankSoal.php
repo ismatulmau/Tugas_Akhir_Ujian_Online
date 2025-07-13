@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+
 
 class BankSoal extends Model
 {
@@ -49,8 +51,20 @@ public function settingUjian()
 protected static function booted()
 {
     static::deleting(function ($banksoal) {
-        $banksoal->soals()->delete();
+        // Ambil semua soal terkait
+        foreach ($banksoal->soals as $soal) {
+            // Hapus gambar jika ada
+            if ($soal->gambar_soal && Storage::disk('public')->exists($soal->gambar_soal)) {
+                Storage::disk('public')->delete($soal->gambar_soal);
+            }
+
+            // Hapus soalnya
+            $soal->delete();
+        }
+
+        // Jika kamu juga ingin menghapus file lainnya (misalnya gambar pembahasan), bisa ditambahkan di sini
     });
 }
+
 
 }

@@ -114,7 +114,7 @@ class BankSoalController extends Controller
         if ($cekDuplikat) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['duplicate' => 'Bank soal untuk level ' . $request->level . $request->kode_kelas. ' dan jurusan ' . $request->jurusan . ' sudah ada']);
+                ->withErrors(['duplicate' => 'Bank soal untuk level ' . $request->level . ', Kelas ' . $request->kode_kelas. ' dan jurusan ' . $request->jurusan . ' sudah ada']);
         }
 
         $banksoal->update([
@@ -153,7 +153,7 @@ public function toggleStatus($id_bank_soal)
             ->exists();
 
         if ($sudahAktif) {
-            return back()->with('error', 'Bank soal untuk level ' . $banksoal->level . $banksoal->kode_kelas.  ' dan jurusan ' . $banksoal->jurusan . ' sudah ada yang aktif.');
+            return back()->with('error', 'Bank soal untuk level ' . $banksoal->level . ', Kelas' . $banksoal->kode_kelas.  ' dan jurusan ' . $banksoal->jurusan . ' sudah ada yang aktif.');
         }
 
         // Cek apakah memiliki soal
