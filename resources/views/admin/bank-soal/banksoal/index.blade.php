@@ -189,24 +189,24 @@
                           <div class="col-md-6">
                             <label for="level">Kelas</label>
                             <select
-  name="kode_kelas"
-  id="kode_kelas-{{ $banksoal->id_bank_soal }}"
-  class="form-select"
-  data-id="{{ $banksoal->id_bank_soal }}"
-  data-selected="{{ $banksoal->kode_kelas }}"
-  required>
-  <option value="">-- Pilih Kelas --</option>
-  <option value="ALL" {{ $banksoal->kode_kelas == 'ALL' ? 'selected' : '' }}>Semua Kelas</option>
-  @foreach($kelas as $kls)
-    <option
-      value="{{ $kls->kode_kelas }}"
-      data-jurusan="{{ $kls->jurusan }}"
-      data-level="{{ $kls->level }}"
-      {{ $banksoal->kode_kelas == $kls->kode_kelas ? 'selected' : '' }}>
-      {{ $kls->nama_kelas }}
-    </option>
-  @endforeach
-</select>
+                              name="kode_kelas"
+                              id="kode_kelas-{{ $banksoal->id_bank_soal }}"
+                              class="form-select"
+                              data-id="{{ $banksoal->id_bank_soal }}"
+                              data-selected="{{ $banksoal->kode_kelas }}"
+                              required>
+                              <option value="">-- Pilih Kelas --</option>
+                              <option value="ALL" {{ $banksoal->kode_kelas == 'ALL' ? 'selected' : '' }}>Semua Kelas</option>
+                              @foreach($kelas as $kls)
+                              <option
+                                value="{{ $kls->kode_kelas }}"
+                                data-jurusan="{{ $kls->jurusan }}"
+                                data-level="{{ $kls->level }}"
+                                {{ $banksoal->kode_kelas == $kls->kode_kelas ? 'selected' : '' }}>
+                                {{ $kls->nama_kelas }}
+                              </option>
+                              @endforeach
+                            </select>
 
 
                           </div>
@@ -406,7 +406,7 @@
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     // Untuk setiap modal edit
     document.querySelectorAll('.jurusan-edit').forEach((jurusanSelect) => {
       const id = jurusanSelect.dataset.id;

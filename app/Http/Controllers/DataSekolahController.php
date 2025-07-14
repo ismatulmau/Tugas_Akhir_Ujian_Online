@@ -22,6 +22,7 @@ class DataSekolahController extends Controller
             'tahun_pelajaran' => 'required',
             'nama_kepala_sekolah' => 'required',
             'nip_kepala_sekolah' => 'required',
+            'jenis_tes' => 'required',
         ]);
 
         $data = DataSekolah::first() ?? new DataSekolah();
@@ -36,6 +37,7 @@ class DataSekolahController extends Controller
         $data->tahun_pelajaran = $request->tahun_pelajaran;
         $data->nama_kepala_sekolah = $request->nama_kepala_sekolah;
         $data->nip_kepala_sekolah = $request->nip_kepala_sekolah;
+        $data->jenis_tes = $request->jenis_tes;
         $data->save();
 
         return back()->with('success', 'Data sekolah berhasil disimpan.');

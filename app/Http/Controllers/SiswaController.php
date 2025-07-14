@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Siswa;
 use App\Models\Kelas;
+use App\Models\Mapel;
 use App\Models\SettingUjian;
 use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,6 +21,7 @@ class SiswaController extends Controller
     public function index()
     {
         $kelas = Kelas::all();
+        $mapel = Mapel::all();
         $jurusan = Kelas::select('jurusan')->distinct()->orderBy('jurusan')->get();
 
         $siswas = Siswa::with(['kelas' => function ($query) {
@@ -29,7 +31,7 @@ class SiswaController extends Controller
             ->orderBy('nama_siswa')
             ->get();
 
-        return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan'));
+        return view('admin.masterdata.daftar-siswa.index', compact('siswas', 'kelas', 'jurusan', 'mapel'));
     }
 
 
@@ -247,12 +249,13 @@ class SiswaController extends Controller
             'jadwal' => 'array',
             'jadwal.*.hari' => 'nullable|string',
             'jadwal.*.tanggal' => 'nullable|date',
-            'jadwal.*.jam' => 'nullable|string',
+            'jadwal.*.jam_mulai' => 'nullable|date_format:H:i',
+            'jadwal.*.jam_selesai' => 'nullable|date_format:H:i',
             'jadwal.*.mapel' => 'nullable|string',
         ]);
 
         $dataSekolah = DataSekolah::first();
-        
+
         $query = Siswa::query();
 
         if ($request->jurusan !== 'all') {
@@ -272,6 +275,10 @@ class SiswaController extends Controller
         }
 
         $jadwalUjian = collect($request->jadwal)
+            ->map(function ($item) {
+                $item['jam'] = ($item['jam_mulai'] ?? '') . ' - ' . ($item['jam_selesai'] ?? '');
+                return $item;
+            })
             ->filter(fn($item) => !empty($item['hari']) || !empty($item['tanggal']) || !empty($item['jam']) || !empty($item['mapel']))
             ->groupBy(function ($item) {
                 $hari = $item['hari'] ?? '-';
@@ -280,14 +287,15 @@ class SiswaController extends Controller
             });
 
 
+
         $pdf = Pdf::loadView('siswa.cetak-kartu', [
-    'siswas' => $siswas,
-    'jenis_ujian' => $request->jenis_ujian,
-    'tahun_pelajaran' => $dataSekolah->tahun_pelajaran ?? '-',
-    'nama_kepala' => $dataSekolah->nama_kepala_sekolah ?? '-',
-    'nip_kepala' => $dataSekolah->nip_kepala_sekolah ?? '-',
-    'jadwalUjian' => $jadwalUjian,
-]);
+            'siswas' => $siswas,
+            'jenis_ujian' => $request->jenis_ujian,
+            'tahun_pelajaran' => $dataSekolah->tahun_pelajaran ?? '-',
+            'nama_kepala' => $dataSekolah->nama_kepala_sekolah ?? '-',
+            'nip_kepala' => $dataSekolah->nip_kepala_sekolah ?? '-',
+            'jadwalUjian' => $jadwalUjian,
+        ]);
 
         return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
     }
@@ -314,7 +322,6 @@ class SiswaController extends Controller
 
         return view('siswa.data-peserta', compact('siswa', 'token_ujian'));
     }
-
 
     public function dataUjian(Request $request)
     {

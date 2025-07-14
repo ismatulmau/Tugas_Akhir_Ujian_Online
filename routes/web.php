@@ -13,6 +13,7 @@ use App\Http\Controllers\UjianController;
 use App\Http\Controllers\BankSoalController;
 use App\Http\Controllers\SoalController;
 use App\Http\Controllers\RekapNilaiController;
+use App\Http\Controllers\DataSekolahController;
 
 
 Route::get('/', function () {
@@ -26,9 +27,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 //ROUTE ROLE ADMIN
 Route::middleware('admin')->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    //DATA SEKOLAH
+    Route::get('/data-sekolah', [DataSekolahController::class, 'index'])->name('data-sekolah.index');
+    Route::post('/data-sekolah', [DataSekolahController::class, 'update'])->name('data-sekolah.update');
 
     //DAFTAR KELAS
     Route::get('/kelas/index', [KelasController::class, 'index'])->name('kelas.index');
@@ -92,19 +95,21 @@ Route::middleware('admin')->group(function () {
     Route::get('/rekap/export/{id_sett_ujian}', [RekapNilaiController::class, 'exportExcel'])->name('rekap.nilai.export');
     Route::delete('/rekap-nilai/{id_sett_ujian}', [RekapNilaiController::class, 'hapusRekap'])->name('rekap.nilai.hapus');
 
-
-
+    
 });
 
 //ROUTE ROLE SISWA
 Route::middleware('siswa')->group(function () {
     //DATA PESERTA
     Route::get('/siswa/data-peserta', [SiswaController::class, 'dataPeserta'])->name('siswa.data-peserta');
+
     //DATA UJIAN
     Route::post('/siswa/data-ujian', [SiswaController::class, 'dataUjian'])->name('siswa.data-ujian');
+
     //HALAMAN UJIAN SISWA
     Route::get('/siswa/ujian/{id_sett_ujian}/mulai', [UjianController::class, 'mulaiUjian'])->name('ujian.mulai');
     Route::post('/siswa/ujian/{id_sett_ujian}/submit', [UjianController::class, 'submitUjian'])->name('ujian.submit');
+    
     //HALAMAN KONFIRMASI UJIAN
     Route::get('/siswa/konfirmasi-ujian', function () {
         return view('siswa.konfirmasi-ujian');

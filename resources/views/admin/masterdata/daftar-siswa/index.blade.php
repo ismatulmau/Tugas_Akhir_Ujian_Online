@@ -408,7 +408,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="jurusan" class="form-label">Jurusan</label>
-                                <select class="form-select" name="jurusan" required>
+                                <select class="form-select" name="jurusan" id="jurusan" required>
                                     <option value="">-- Pilih Jurusan --</option>
                                     @foreach($jurusan as $jrs)
                                     <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
@@ -421,41 +421,42 @@
                                 <select class="form-select" id="nama_kelas" name="nama_kelas" required>
                                     <option value="">-- Pilih Kelas --</option>
                                     @foreach($kelas as $kls)
-                                    <option value="{{ $kls->nama_kelas }}">{{ $kls->nama_kelas }}</option>
+                                    <option
+                                        value="{{ $kls->nama_kelas }}"
+                                        data-jurusan="{{ $kls->jurusan }}">
+                                        {{ $kls->nama_kelas }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="mb-3">
                                 <label for="jenis_ujian" class="form-label">Jenis Ujian</label>
-                                <select class="form-select" id="jenis_ujian" name="jenis_ujian" required>
-                                    <option value="">-- Pilih Jenis Ujian --</option>
-                                    <option value="UTS">UTS</option>
-                                    <option value="UAS">UAS</option>
-                                </select>
+                                <input type="text" class="form-control" id="jenis_ujian" name="jenis_ujian"
+                                    value="{{ $dataSekolah->jenis_tes ?? '-' }}" readonly>
                             </div>
                         </div>
 
                         <!-- Kolom Kanan -->
                         <div class="col-md-6">
-    <div class="mb-3">
-        <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
-        <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran"
-            value="{{ $dataSekolah->tahun_pelajaran ?? '-' }}" readonly>
-    </div>
+                            <div class="mb-3">
+                                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+                                <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran"
+                                    value="{{ $dataSekolah->tahun_pelajaran ?? '-' }}" readonly>
+                            </div>
 
-    <div class="mb-3">
-        <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
-        <input type="text" class="form-control" id="nama_kepala" name="nama_kepala"
-            value="{{ $dataSekolah->nama_kepala_sekolah ?? '-' }}" readonly>
-    </div>
+                            <div class="mb-3">
+                                <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
+                                <input type="text" class="form-control" id="nama_kepala" name="nama_kepala"
+                                    value="{{ $dataSekolah->nama_kepala_sekolah ?? '-' }}" readonly>
+                            </div>
 
-    <div class="mb-3">
-        <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
-        <input type="text" class="form-control" id="nip_kepala" name="nip_kepala"
-            value="{{ $dataSekolah->nip_kepala_sekolah ?? '-' }}" readonly>
-    </div>
-</div>
+                            <div class="mb-3">
+                                <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
+                                <input type="text" class="form-control" id="nip_kepala" name="nip_kepala"
+                                    value="{{ $dataSekolah->nip_kepala_sekolah ?? '-' }}" readonly>
+                            </div>
+                        </div>
 
                     </div>
 
@@ -466,21 +467,27 @@
                         <small class="d-block text-muted mb-2">Klik "Tambah" untuk menambahkan jadwal:</small>
 
                         <div id="jadwal-wrapper">
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-3">
-                                    <input type="text" name="jadwal[0][hari]" class="form-control hari"
-                                        placeholder="Hari" readonly>
+                            <div class="row g-2 mb-2 align-items-center">
+                                <div class="col-md-2">
+                                    <input type="text" name="jadwal[0][hari]" class="form-control hari" placeholder="Hari" readonly>
                                 </div>
                                 <div class="col-md-3">
                                     <input type="date" name="jadwal[0][tanggal]" class="form-control tanggal">
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="text" name="jadwal[0][jam]" class="form-control"
-                                        placeholder="Jam (cth: 08.00-10.00)">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="time" name="jadwal[0][jam_mulai]" class="form-control" required>
+                                        <span class="input-group-text">s/d</span>
+                                        <input type="time" name="jadwal[0][jam_selesai]" class="form-control" required>
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <input type="text" name="jadwal[0][mapel]" class="form-control"
-                                        placeholder="Mata Pelajaran">
+                                    <select name="jadwal[0][mapel]" class="form-select" required>
+                                        <option value="">-- Pilih Mapel --</option>
+                                        @foreach($mapel as $mp)
+                                        <option value="{{ $mp->nama_mapel }}">{{ $mp->nama_mapel }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -489,6 +496,7 @@
                             <i class="fas fa-plus"></i> Tambah Jadwal
                         </button>
                     </div>
+
 
                 </div>
 
@@ -534,22 +542,39 @@
 
         const minDate = getTanggalHariIni();
 
+        // Template dropdown mapel dari backend (Laravel Blade), ubah ke dalam JavaScript string
+        const mapelOptions = `
+        @foreach($mapel as $mp)
+            <option value="{{ $mp->nama_mapel }}">{{ $mp->nama_mapel }}</option>
+        @endforeach
+    `;
+
         row.innerHTML = `
-        <div class="col-md-3">
-          <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control hari" placeholder="Hari" readonly>
+    <div class="col-md-2">
+        <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control hari" placeholder="Hari" readonly>
+    </div>
+    <div class="col-md-3">
+        <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control tanggal" min="${minDate}">
+    </div>
+    <div class="col-md-4">
+        <div class="input-group">
+            <input type="time" name="jadwal[${jadwalIndex}][jam_mulai]" class="form-control" required>
+            <span class="input-group-text">s/d</span>
+            <input type="time" name="jadwal[${jadwalIndex}][jam_selesai]" class="form-control" required>
         </div>
-        <div class="col-md-3">
-          <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control tanggal" min="${minDate}">
-        </div>
-        <div class="col-md-3">
-          <input type="text" name="jadwal[${jadwalIndex}][jam]" class="form-control" placeholder="Jam (cth: 08.00-10.00)">
-        </div>
-        <div class="col-md-3">
-          <input type="text" name="jadwal[${jadwalIndex}][mapel]" class="form-control" placeholder="Mata Pelajaran">
-        </div>
-      `;
+    </div>
+    <div class="col-md-3">
+        <select name="jadwal[${jadwalIndex}][mapel]" class="form-select" required>
+            <option value="">-- Pilih Mapel --</option>
+            ${mapelOptions}
+        </select>
+    </div>
+`;
+
+
         wrapper.appendChild(row);
 
+        // Bind hari otomatis dari tanggal
         const inputTanggal = row.querySelector('.tanggal');
         const inputHari = row.querySelector('.hari');
         bindTanggalKeHari(inputTanggal, inputHari);
@@ -600,4 +625,32 @@
 </div>
 
 </div>
+
+<!-- filter kelas -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const jurusanSelect = document.getElementById('jurusan');
+        const kelasSelect = document.getElementById('nama_kelas');
+
+        // Simpan semua opsi awal
+        const allOptions = Array.from(kelasSelect.querySelectorAll('option'));
+
+        jurusanSelect.addEventListener('change', function() {
+            const selectedJurusan = jurusanSelect.value;
+
+            // Bersihkan semua opsi kelas kecuali placeholder pertama
+            kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+
+            // Filter dan tambahkan opsi yang cocok
+            allOptions.forEach(option => {
+                if (option.value === "") return; // Skip placeholder
+
+                if (option.dataset.jurusan === selectedJurusan) {
+                    kelasSelect.appendChild(option);
+                }
+            });
+        });
+    });
+</script>
+
 @endsection
