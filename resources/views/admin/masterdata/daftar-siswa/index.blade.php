@@ -91,14 +91,15 @@
 
                                     @if($siswa->gambar && file_exists($fotoPath))
                                     <img src="{{ asset('storage/' . $siswa->gambar) }}" alt="Foto Siswa"
-                                        class="rounded-circle" width="40" height="40">
+                                        width="40" height="40">
                                     @else
-                                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center"
+                                    <div class="bg-secondary d-flex align-items-center justify-content-center"
                                         style="width: 40px; height: 40px;">
                                         <i class="fa fa-user text-white"></i>
                                     </div>
                                     @endif
                                 </td>
+
                                 <td>
                                     <div>{{ $siswa->nomor_ujian }}</div>
                                     <small class="text-muted">Sesi: {{ $siswa->sesi_ujian }}</small>
@@ -169,7 +170,8 @@
                                                             @foreach($kelas as $kls)
                                                             <option value="{{ $kls->kode_kelas }}"
                                                                 {{ $kls->kode_kelas == $siswa->kode_kelas ? 'selected' : '' }}>
-                                                                {{ $kls->nama_kelas }}</option>
+                                                                {{ $kls->nama_kelas }}
+                                                            </option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -214,7 +216,8 @@
                                                             @foreach($jurusan as $jrs)
                                                             <option value="{{ $jrs->jurusan }}"
                                                                 {{ $siswa->jurusan == $jrs->jurusan ? 'selected' : '' }}>
-                                                                {{ $jrs->jurusan }}</option>
+                                                                {{ $jrs->jurusan }}
+                                                            </option>
                                                             @endforeach
                                                         </select>
                                                     </div>
@@ -400,60 +403,61 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                   <div class="row g-3 align-items-start">
-    <!-- Kolom Kiri -->
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label for="jurusan" class="form-label">Jurusan</label>
-            <select class="form-select" name="jurusan" required>
-                <option value="">-- Pilih Jurusan --</option>
-                @foreach($jurusan as $jrs)
-                    <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
-                @endforeach
-            </select>
-        </div>
+                    <div class="row g-3 align-items-start">
+                        <!-- Kolom Kiri -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="jurusan" class="form-label">Jurusan</label>
+                                <select class="form-select" name="jurusan" required>
+                                    <option value="">-- Pilih Jurusan --</option>
+                                    @foreach($jurusan as $jrs)
+                                    <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-        <div class="mb-3">
-            <label for="kelas" class="form-label">Kelas</label>
-            <select class="form-select" id="nama_kelas" name="nama_kelas" required>
-                <option value="">-- Pilih Kelas --</option>
-                @foreach($kelas as $kls)
-                    <option value="{{ $kls->nama_kelas }}">{{ $kls->nama_kelas }}</option>
-                @endforeach
-            </select>
-        </div>
+                            <div class="mb-3">
+                                <label for="kelas" class="form-label">Kelas</label>
+                                <select class="form-select" id="nama_kelas" name="nama_kelas" required>
+                                    <option value="">-- Pilih Kelas --</option>
+                                    @foreach($kelas as $kls)
+                                    <option value="{{ $kls->nama_kelas }}">{{ $kls->nama_kelas }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-        <div class="mb-3">
-            <label for="jenis_ujian" class="form-label">Jenis Ujian</label>
-            <select class="form-select" id="jenis_ujian" name="jenis_ujian" required>
-                <option value="">-- Pilih Jenis Ujian --</option>
-                <option value="UTS">UTS</option>
-                <option value="UAS">UAS</option>
-            </select>
-        </div>
+                            <div class="mb-3">
+                                <label for="jenis_ujian" class="form-label">Jenis Ujian</label>
+                                <select class="form-select" id="jenis_ujian" name="jenis_ujian" required>
+                                    <option value="">-- Pilih Jenis Ujian --</option>
+                                    <option value="UTS">UTS</option>
+                                    <option value="UAS">UAS</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Kolom Kanan -->
+                        <div class="col-md-6">
+    <div class="mb-3">
+        <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+        <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran"
+            value="{{ $dataSekolah->tahun_pelajaran ?? '-' }}" readonly>
     </div>
 
-    <!-- Kolom Kanan -->
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
-            <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran"
-                placeholder="Contoh: 2024/2025" value="2024/2025" required readonly>
-        </div>
+    <div class="mb-3">
+        <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
+        <input type="text" class="form-control" id="nama_kepala" name="nama_kepala"
+            value="{{ $dataSekolah->nama_kepala_sekolah ?? '-' }}" readonly>
+    </div>
 
-        <div class="mb-3">
-            <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
-            <input type="text" class="form-control" id="nama_kepala" name="nama_kepala"
-                value="Bambang Pamungkas, S.Kom" required readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
-            <input type="text" class="form-control" id="nip_kepala" name="nip_kepala"
-                value="12345678" required readonly>
-        </div>
+    <div class="mb-3">
+        <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
+        <input type="text" class="form-control" id="nip_kepala" name="nip_kepala"
+            value="{{ $dataSekolah->nip_kepala_sekolah ?? '-' }}" readonly>
     </div>
 </div>
+
+                    </div>
 
 
                     <!-- Jadwal Ujian (Full Width) -->
@@ -501,36 +505,36 @@
 
 <!-- function tambah jadwal -->
 <script>
-let jadwalIndex = 1;
+    let jadwalIndex = 1;
 
-function getNamaHari(tanggalStr) {
-    const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const tanggal = new Date(tanggalStr);
-    return hari[tanggal.getDay()];
-}
+    function getNamaHari(tanggalStr) {
+        const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const tanggal = new Date(tanggalStr);
+        return hari[tanggal.getDay()];
+    }
 
-function getTanggalHariIni() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-}
+    function getTanggalHariIni() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
 
-function bindTanggalKeHari(inputTanggal, inputHari) {
-    inputTanggal.addEventListener('change', function() {
-        inputHari.value = this.value ? getNamaHari(this.value) : '';
-    });
-}
+    function bindTanggalKeHari(inputTanggal, inputHari) {
+        inputTanggal.addEventListener('change', function() {
+            inputHari.value = this.value ? getNamaHari(this.value) : '';
+        });
+    }
 
-function tambahJadwal() {
-    const wrapper = document.getElementById('jadwal-wrapper');
-    const row = document.createElement('div');
-    row.classList.add('row', 'g-2', 'mb-2');
+    function tambahJadwal() {
+        const wrapper = document.getElementById('jadwal-wrapper');
+        const row = document.createElement('div');
+        row.classList.add('row', 'g-2', 'mb-2');
 
-    const minDate = getTanggalHariIni();
+        const minDate = getTanggalHariIni();
 
-    row.innerHTML = `
+        row.innerHTML = `
         <div class="col-md-3">
           <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control hari" placeholder="Hari" readonly>
         </div>
@@ -544,26 +548,26 @@ function tambahJadwal() {
           <input type="text" name="jadwal[${jadwalIndex}][mapel]" class="form-control" placeholder="Mata Pelajaran">
         </div>
       `;
-    wrapper.appendChild(row);
+        wrapper.appendChild(row);
 
-    const inputTanggal = row.querySelector('.tanggal');
-    const inputHari = row.querySelector('.hari');
-    bindTanggalKeHari(inputTanggal, inputHari);
+        const inputTanggal = row.querySelector('.tanggal');
+        const inputHari = row.querySelector('.hari');
+        bindTanggalKeHari(inputTanggal, inputHari);
 
-    jadwalIndex++;
-}
-
-// Jalankan saat pertama kali halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-    const inputTanggalAwal = document.querySelector('.tanggal');
-    const inputHariAwal = document.querySelector('.hari');
-
-    if (inputTanggalAwal && inputHariAwal) {
-        const minDate = getTanggalHariIni();
-        inputTanggalAwal.setAttribute('min', minDate);
-        bindTanggalKeHari(inputTanggalAwal, inputHariAwal);
+        jadwalIndex++;
     }
-});
+
+    // Jalankan saat pertama kali halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputTanggalAwal = document.querySelector('.tanggal');
+        const inputHariAwal = document.querySelector('.hari');
+
+        if (inputTanggalAwal && inputHariAwal) {
+            const minDate = getTanggalHariIni();
+            inputTanggalAwal.setAttribute('min', minDate);
+            bindTanggalKeHari(inputTanggalAwal, inputHariAwal);
+        }
+    });
 </script>
 
 

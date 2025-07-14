@@ -1,17 +1,22 @@
 <div class="sidebar" data-background-color="dark">
     <!-- Sidebar Header with Logo and School Name -->
-    <div class="sidebar-logo">
-        <div class="logo-header" data-background-color="dark" style="display: flex; align-items: center; padding: 15px 20px;">
-            <a href="{{ route('admin.dashboard') }}" class="logo" style="display: flex; align-items: center; text-decoration: none;">
-                <img src="{{ asset('assets/img/logo_telematika.png') }}" alt="SMK Telematika Indramayu" class="navbar-brand" height="50">
-                <div style="margin-left: 10px; color: white;">
-                    <h4 style="margin: 0; font-weight: 600; font-size: 1.1rem;">SMK Telematika</h4>
-                    <p style="margin: 0; font-weight: 600; font-size: 1.1rem;">Indramayu</p>
-                </div>
-            </a>
-            
-        </div>
+<div class="sidebar-logo">
+    <div class="logo-header" data-background-color="dark" style="display: flex; align-items: center; padding: 15px 20px;">
+        <a href="{{ route('admin.dashboard') }}" class="logo d-flex align-items-center text-decoration-none">
+            @if(!empty($dataSekolah->logo) && file_exists(public_path('storage/' . $dataSekolah->logo)))
+                <img src="{{ asset('storage/' . $dataSekolah->logo) }}" alt="Logo Sekolah" class="navbar-brand" height="50">
+            @else
+                <img src="{{ asset('assets/img/default-logo.png') }}" alt="Logo Default" class="navbar-brand" height="50">
+            @endif
+
+            <div style="margin-left: 10px; color: white;">
+                <h4 class="m-0" style="font-weight: 600; font-size: 1.1rem;">{{ $dataSekolah->nama_sekolah ?? 'SMK Telematika' }}</h4>
+                
+            </div>
+        </a>
     </div>
+</div>
+
 
     <div class="sidebar-wrapper scrollbar scrollbar-inner">
         <div class="sidebar-content">
@@ -31,6 +36,12 @@
                     </a>
                     <div class="collapse" id="base">
                         <ul class="nav nav-collapse">
+                            <li class="nav-item {{ request()->routeIs('data-sekolah.index') ? 'active' : '' }}">
+                                <a href="{{ route('data-sekolah.index') }}" class="nav-link">
+                                    <span class="sub-item">Data Sekolah</span>
+                                </a>
+                            </li>
+
                             <li class="nav-item {{ request()->routeIs('kelas.index') ? 'active' : '' }}">
                                 <a href="{{ route('kelas.index') }}" class="nav-link">
                                     <span class="sub-item">Daftar Kelas</span>
@@ -44,7 +55,7 @@
                                 <a href="{{ route('siswa.index') }}" class="nav-link"><span class="sub-item">Daftar Siswa</span></a>
                             </li>
                         </ul>
-                    </div> 
+                    </div>
                 </li>
 
                 <!-- BANK SOAL -->
@@ -78,12 +89,12 @@
                             <li class="nav-item {{ request()->routeIs('jadwal.ujian') ? 'active' : '' }}">
                                 <a href="{{ route('jadwal.ujian') }}" class="nav-link"><span class="sub-item">Jadwal Ujian</span></a>
                             </li>
-                            
+
                         </ul>
                     </div>
                 </li>
 
-<li class="nav-item {{ request()->routeIs('rekap.nilai.index') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->routeIs('rekap.nilai.index') ? 'active' : '' }}">
                     <a href="{{ route('rekap.nilai.index') }}" class="nav-link">
                         <i class="fas fa-table"></i>
                         <p>Rekap Nilai</p>

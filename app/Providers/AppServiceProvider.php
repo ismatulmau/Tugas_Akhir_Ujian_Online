@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
+use App\Models\DataSekolah;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,9 +20,16 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
-        Route::aliasMiddleware('siswa', \App\Http\Middleware\SiswaMiddleware::class);
-    }
+   public function boot(): void
+{
+    // Middleware
+    Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
+    Route::aliasMiddleware('siswa', \App\Http\Middleware\SiswaMiddleware::class);
+
+    // Share data sekolah ke semua view
+    View::composer('*', function ($view) {
+        $dataSekolah = DataSekolah::first(); // Ambil satu baris data
+        $view->with('dataSekolah', $dataSekolah);
+    });
+}
 }

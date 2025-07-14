@@ -13,6 +13,7 @@ use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\SiswaTemplateExport;
+use App\Models\DataSekolah;
 
 class SiswaController extends Controller
 {
@@ -243,9 +244,6 @@ class SiswaController extends Controller
             'jurusan' => 'required',
             'nama_kelas' => 'required',
             'jenis_ujian' => 'required',
-            'tahun_pelajaran' => 'required|string',
-            'nama_kepala' => 'required|string',
-            'nip_kepala' => 'required|string',
             'jadwal' => 'array',
             'jadwal.*.hari' => 'nullable|string',
             'jadwal.*.tanggal' => 'nullable|date',
@@ -253,6 +251,8 @@ class SiswaController extends Controller
             'jadwal.*.mapel' => 'nullable|string',
         ]);
 
+        $dataSekolah = DataSekolah::first();
+        
         $query = Siswa::query();
 
         if ($request->jurusan !== 'all') {
@@ -281,13 +281,13 @@ class SiswaController extends Controller
 
 
         $pdf = Pdf::loadView('siswa.cetak-kartu', [
-            'siswas' => $siswas,
-            'jenis_ujian' => $request->jenis_ujian,
-            'tahun_pelajaran' => $request->tahun_pelajaran,
-            'nama_kepala' => $request->nama_kepala,
-            'nip_kepala' => $request->nip_kepala,
-            'jadwalUjian' => $jadwalUjian,
-        ]);
+    'siswas' => $siswas,
+    'jenis_ujian' => $request->jenis_ujian,
+    'tahun_pelajaran' => $dataSekolah->tahun_pelajaran ?? '-',
+    'nama_kepala' => $dataSekolah->nama_kepala_sekolah ?? '-',
+    'nip_kepala' => $dataSekolah->nip_kepala_sekolah ?? '-',
+    'jadwalUjian' => $jadwalUjian,
+]);
 
         return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
     }

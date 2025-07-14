@@ -22,25 +22,25 @@ class RekapNilaiController extends Controller
 
     // Export ke Excel berdasarkan id_sett_ujian
     public function exportExcel($id_sett_ujian)
-{
-    // Ambil data setting ujian beserta relasi ke bank soal
-    $setting = SettingUjian::with('bankSoal')->findOrFail($id_sett_ujian);
+    {
+        // Ambil data setting ujian beserta relasi ke bank soal
+        $setting = SettingUjian::with('bankSoal')->findOrFail($id_sett_ujian);
 
-    $jenisTes = strtoupper(str_replace(' ', '_', $setting->jenis_tes));
-    $namaBankSoal = strtoupper(str_replace(' ', '_', $setting->bankSoal->nama_bank_soal));
-    $level = strtoupper(str_replace(' ', '_', $setting->bankSoal->level));
-    $jurusan = strtoupper(str_replace(' ', '_', $setting->bankSoal->jurusan));
+        $jenisTes = strtoupper(str_replace(' ', '_', $setting->jenis_tes));
+        $namaBankSoal = strtoupper(str_replace(' ', '_', $setting->bankSoal->nama_bank_soal));
+        $level = strtoupper(str_replace(' ', '_', $setting->bankSoal->level));
+        $jurusan = strtoupper(str_replace(' ', '_', $setting->bankSoal->jurusan));
 
-    $namaFile = "REKAP_NILAI_{$jenisTes}_{$namaBankSoal}_{$level}_{$jurusan}.xlsx";
+        $namaFile = "REKAP_NILAI_{$jenisTes}_{$namaBankSoal}_{$level}_{$jurusan}.xlsx";
 
-    return Excel::download(new RekapNilaiExport($id_sett_ujian), $namaFile);
-}
+        return Excel::download(new RekapNilaiExport($id_sett_ujian), $namaFile);
+    }
 
-public function hapusRekap($id_sett_ujian)
-{
-    // Hapus semua jawaban untuk ujian tersebut
-    Jawaban::where('id_sett_ujian', $id_sett_ujian)->delete();
+    public function hapusRekap($id_sett_ujian)
+    {
+        // Hapus semua jawaban untuk ujian tersebut
+        Jawaban::where('id_sett_ujian', $id_sett_ujian)->delete();
 
-    return redirect()->back()->with('success', 'Rekap nilai berhasil dihapus.');
-}
+        return redirect()->back()->with('success', 'Rekap nilai berhasil dihapus.');
+    }
 }

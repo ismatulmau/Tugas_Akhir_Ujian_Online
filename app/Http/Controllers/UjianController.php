@@ -9,65 +9,62 @@ use App\Models\Jawaban;
 class UjianController extends Controller
 {
     public function mulaiUjian($id_sett_ujian)
-{
-    $siswa = auth()->guard('siswa')->user();
+    {
+        $siswa = auth()->guard('siswa')->user();
 
-    if (session('ujian_terverifikasi') != $id_sett_ujian) {
-        return redirect()->route('siswa.data-peserta')
-            ->with('error', 'Masukkan token terlebih dahulu untuk mengakses ujian.');
+        if (session('ujian_terverifikasi') != $id_sett_ujian) {
+            return redirect()->route('siswa.data-peserta')
+                ->with('error', 'Masukkan token terlebih dahulu untuk mengakses ujian.');
+        }
+
+        $ujian = SettingUjian::with(['bankSoal'])->findOrFail($id_sett_ujian);
+
+        if (
+            $ujian->bankSoal->jurusan !== $siswa->jurusan ||
+            $ujian->bankSoal->level !== $siswa->level ||
+            ($ujian->bankSoal->kode_kelas !== 'ALL' && $ujian->bankSoal->kode_kelas !== $siswa->kode_kelas)
+        ) {
+            return redirect()->route('siswa.data-peserta')
+                ->with('error', 'Ujian ini tidak sesuai dengan jurusan, kelas atau tingkat Anda.');
+        }
+
+        // ✅ Cek kesesuaian sesi ujian
+        if ($ujian->sesi !== $siswa->sesi_ujian) {
+            return redirect()->route('siswa.data-peserta')
+                ->with('error', 'Sesi ujian Anda tidak sesuai dengan sesi ujian yang dijadwalkan.');
+        }
+
+
+        if ($ujian->status !== 'aktif' || $ujian->bankSoal->status !== 'aktif') {
+            return redirect()->route('siswa.data-peserta')
+                ->with('error', 'Ujian ini sudah tidak tersedia atau sudah dinonaktifkan.');
+        }
+
+        $sudahMengerjakan = \App\Models\Jawaban::where('id_sett_ujian', $id_sett_ujian)
+            ->where('id_siswa', $siswa->id_siswa)
+            ->exists();
+
+        if ($sudahMengerjakan) {
+            return redirect()->route('siswa.data-peserta')
+                ->with('error', 'Anda sudah mengerjakan ujian ini sebelumnya.');
+        }
+
+        $jmlSoal = $ujian->bankSoal->jml_soal;
+        $sessionKey = 'soal_ujian_' . $siswa->id_siswa . '_' . $id_sett_ujian;
+
+        if (session()->has($sessionKey)) {
+            $soalIds = session($sessionKey);
+            $soals = \App\Models\Soal::whereIn('id_soal', $soalIds)->get()->sortBy(function ($soal) use ($soalIds) {
+                return array_search($soal->id_soal, $soalIds);
+            })->values();
+        } else {
+            $soals = $ujian->bankSoal->soals()->inRandomOrder()->limit($jmlSoal)->get();
+            $soalIds = $soals->pluck('id_soal')->toArray();
+            session([$sessionKey => $soalIds]);
+        }
+
+        return view('siswa.mulai-ujian', compact('ujian', 'soals'));
     }
-
-    $ujian = SettingUjian::with(['bankSoal'])->findOrFail($id_sett_ujian);
-
-    if (
-    $ujian->bankSoal->jurusan !== $siswa->jurusan ||
-    $ujian->bankSoal->level !== $siswa->level ||
-    ($ujian->bankSoal->kode_kelas !== 'ALL' && $ujian->bankSoal->kode_kelas !== $siswa->kode_kelas)
-) {
-    return redirect()->route('siswa.data-peserta')
-        ->with('error', 'Ujian ini tidak sesuai dengan jurusan, kelas atau tingkat Anda.');
-}
-
-// ✅ Cek kesesuaian sesi ujian
-    if ($ujian->sesi !== $siswa->sesi_ujian) {
-        return redirect()->route('siswa.data-peserta')
-            ->with('error', 'Sesi ujian Anda tidak sesuai dengan sesi ujian yang dijadwalkan.');
-    }
-
-
-    if ($ujian->status !== 'aktif' || $ujian->bankSoal->status !== 'aktif') {
-        return redirect()->route('siswa.data-peserta')
-            ->with('error', 'Ujian ini sudah tidak tersedia atau sudah dinonaktifkan.');
-    }
-
-    $sudahMengerjakan = \App\Models\Jawaban::where('id_sett_ujian', $id_sett_ujian)
-        ->where('id_siswa', $siswa->id_siswa)
-        ->exists();
-
-    if ($sudahMengerjakan) {
-        return redirect()->route('siswa.data-peserta')
-            ->with('error', 'Anda sudah mengerjakan ujian ini sebelumnya.');
-    }
-
-    $jmlSoal = $ujian->bankSoal->jml_soal;
-    $sessionKey = 'soal_ujian_' . $siswa->id_siswa . '_' . $id_sett_ujian;
-
-    if (session()->has($sessionKey)) {
-        $soalIds = session($sessionKey);
-        $soals = \App\Models\Soal::whereIn('id_soal', $soalIds)->get()->sortBy(function ($soal) use ($soalIds) {
-    return array_search($soal->id_soal, $soalIds);
-})->values();
-    } else {
-        $soals = $ujian->bankSoal->soals()->inRandomOrder()->limit($jmlSoal)->get();
-        $soalIds = $soals->pluck('id_soal')->toArray();
-        session([$sessionKey => $soalIds]);
-    }
-
-    return view('siswa.mulai-ujian', compact('ujian', 'soals'));
-}
-
-
-
 
     public function submitUjian(Request $request, $id_sett_ujian)
     {

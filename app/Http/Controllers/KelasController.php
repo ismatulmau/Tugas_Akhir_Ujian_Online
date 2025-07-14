@@ -102,6 +102,12 @@ class KelasController extends Controller
         $import = new KelasImport();
         Excel::import($import, $request->file('file'));
 
+        // ❗ Jika ada level tidak valid, lempar exception
+        if (!empty($import->levelTidakValid)) {
+            $invalidLevels = implode(', ', array_unique($import->levelTidakValid));
+            return redirect()->back()->with('error', "Import gagal. Ditemukan level tidak valid: $invalidLevels. Hanya level X, XI, dan XII yang diperbolehkan.");
+        }
+
         $total = $import->berhasil + $import->duplikat;
         $message = "Import selesai. Total data: $total. 
                     Berhasil: $import->berhasil. 

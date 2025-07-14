@@ -11,15 +11,24 @@ class KelasImport implements ToModel, WithHeadingRow
 {
     public $berhasil = 0;
     public $duplikat = 0;
+    public $levelTidakValid = []; 
+    protected $levelValid = ['X', 'XI', 'XII'];
 
     public function model(array $row)
     {
         try {
+            $level = strtoupper(trim($row['level']));
+
+            if (!in_array($level, $this->levelValid)) {
+                $this->levelTidakValid[] = $level;
+                return null;
+            }
+
             if (!Kelas::where('kode_kelas', $row['kode_kelas'])->exists()) {
                 $this->berhasil++;
                 return new Kelas([
                     'kode_kelas' => $row['kode_kelas'],
-                    'level' => $row['level'],
+                    'level' => $level,
                     'jurusan' => $row['jurusan'],
                     'nama_kelas' => $row['nama_kelas'],
                 ]);
