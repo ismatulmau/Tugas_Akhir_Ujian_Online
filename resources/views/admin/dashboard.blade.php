@@ -60,7 +60,7 @@
                             <div class="col col-stats">
                                 <div class="numbers">
                                     <h4 class="card-title">Bank Soal</h4>
-                                    <p class="card-category">Manajemen soal ujian dan file pendukung soal.</p>
+                                    <p class="card-category">Manajemen bank soal dan soal ujian.</p>
                                 </div>
                             </div>
                         </div>

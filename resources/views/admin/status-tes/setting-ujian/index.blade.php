@@ -197,7 +197,6 @@
           <li>Beberapa ujian (untuk level dan jurusan berbeda) bisa diatur dalam waktu bersamaan.</li>
           <li>Apabila satu level memiliki beberapa ujian bersamaan (untuk level dan jurusan yang sama), maka peserta <strong>tidak dapat mengikuti ujian</strong> (*terlambat mengikuti ujian).</li>
           <li>Daftar di atas merupakan paket ujian yang telah <strong>diaktifkan oleh admin</strong>. Silakan melakukan pengaturan daftar ujian dengan mengklik tombol <strong>‘Pengaturan Ujian’</strong> pada kolom jadwal.</li>
-          <li>Jika ingin berganti sesi, silahkan atur ulang dengan mengedit jadwalnya.</li>
         </ul>
       </div>
     </div>
