@@ -33,13 +33,13 @@ class RekapNilaiExport implements FromArray, WithEvents
             ['REKAP NILAI UJIAN'],
             [''],
             ['Nama Bank Soal', ': ' . $s->bankSoal->nama_bank_soal, 'Mata Pelajaran', ': ' . $mapel],
-            ['Level', ': ' . $s->bankSoal->level . ' - ' . $s->bankSoal->jurusan, 'Jenis Tes', ': ' . $s->jenis_tes],
+            ['Jurusan', ': ' . $s->bankSoal->level . ' - ' . $s->bankSoal->jurusan, 'Jenis Tes', ': ' . $s->jenis_tes],
             ['Waktu Mulai', ': ' . $s->waktu_mulai, 'Waktu Selesai', ': ' . $s->waktu_selesai],
             ['Durasi', ': ' . $s->durasi . ' menit', 'Sesi', ': ' . $s->sesi],
             ['Token', ': ' . $s->token],
             [''],
             // Header (satu baris saja sekarang)
-            ['No', 'No. Ujian', 'Nama Siswa', 'Kelas', 'Jurusan', 'Sesi', 'Jumlah Soal', 'Terjawab', 'Jawaban Benar', 'Total Nilai'],
+            ['No', 'No. Ujian', 'Nama Siswa', 'Kelas', 'Jumlah Soal', 'Terjawab', 'Jawaban Benar', 'Total Nilai'],
         ];
 
         $rekap = [];
@@ -64,8 +64,6 @@ class RekapNilaiExport implements FromArray, WithEvents
                 $siswa->nomor_ujian,
                 $siswa->nama_siswa,
                 $siswa->kelas->nama_kelas ?? '-',
-                $siswa->kelas->jurusan ?? '-',
-                $s->sesi,
                 $totalSoal,
                 $jumlahDijawab,
                 $jumlahBenar,
@@ -83,12 +81,12 @@ class RekapNilaiExport implements FromArray, WithEvents
                 $sheet = $event->sheet->getDelegate();
 
                 // Merge judul
-                $sheet->mergeCells('A1:J1');
+                $sheet->mergeCells('A1:H1');
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Merge header karena tidak ada sub header sekarang
-                $sheet->getStyle('A9:J9')->applyFromArray([
+                $sheet->getStyle('A9:H9')->applyFromArray([
                     'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => '0000FF']],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
@@ -102,7 +100,7 @@ class RekapNilaiExport implements FromArray, WithEvents
 
                 // Border seluruh isi tabel
                 $lastRow = $sheet->getHighestRow();
-                $sheet->getStyle("A9:J{$lastRow}")->applyFromArray([
+                $sheet->getStyle("A9:H{$lastRow}")->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -112,7 +110,7 @@ class RekapNilaiExport implements FromArray, WithEvents
                 ]);
 
                 // Auto-size semua kolom A sampai J
-                foreach (range('A', 'J') as $col) {
+                foreach (range('A', 'H') as $col) {
                     $sheet->getColumnDimension($col)->setAutoSize(true);
                 }
             },

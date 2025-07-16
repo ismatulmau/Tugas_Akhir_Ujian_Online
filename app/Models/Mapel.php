@@ -23,6 +23,11 @@ class Mapel extends Model
         'kkm',
     ];
 
+    public function kelas()
+{
+    return $this->belongsToMany(Kelas::class, 'kelas_mapel', 'kode_mapel', 'kode_kelas');
+}
+
     
 }
 

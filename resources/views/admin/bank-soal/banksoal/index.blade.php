@@ -150,18 +150,6 @@
                             <label for="nama_bank_soal" class="form-label">Nama Bank Soal</label>
                             <input type="text" class="form-control" name="nama_bank_soal" value="{{ $banksoal->nama_bank_soal }}" required>
                           </div>
-
-                          <div class="col-md-6">
-                            <label for="kode_mapel" class="form-label">Mata Pelajaran</label>
-                            <select class="form-select" name="kode_mapel" required>
-                              @foreach($mapels as $mapel)
-                              <option value="{{ $mapel->kode_mapel }}" {{ $banksoal->kode_mapel == $mapel->kode_mapel ? 'selected' : '' }}>
-                                {{ $mapel->nama_mapel }}
-                              </option>
-                              @endforeach
-                            </select>
-                          </div>
-
                           <div class="col-md-6">
                             <label for="jurusan" class="form-label">Jurusan</label>
                             <select name="jurusan" id="jurusan-{{ $banksoal->id_bank_soal }}" class="form-select jurusan-edit" data-id="{{ $banksoal->id_bank_soal }}">
@@ -207,9 +195,20 @@
                               </option>
                               @endforeach
                             </select>
-
-
                           </div>
+
+                          <div class="col-md-6">
+                            <label for="kode_mapel" class="form-label">Mata Pelajaran</label>
+                            <select class="form-select mapel-edit" name="kode_mapel" id="kode_mapel-{{ $banksoal->id_bank_soal }}" required>
+                              @foreach($mapels as $mapel)
+                              <option value="{{ $mapel->kode_mapel }}" {{ $banksoal->kode_mapel == $mapel->kode_mapel ? 'selected' : '' }}>
+                                {{ $mapel->nama_mapel }}
+                              </option>
+                              @endforeach
+                            </select>
+                          </div>
+
+
                           <div class="col-md-6">
                             <label for="opsi_jawaban" class="form-label">Opsi Jawaban</label>
                             <select class="form-select" name="opsi_jawaban" required>
@@ -302,16 +301,6 @@
             </div>
 
             <div class="col-md-6">
-              <label for="kode_mapel" class="form-label">Mata Pelajaran</label>
-              <select class="form-select" name="kode_mapel" required>
-                <option value="">-- Pilih Mapel --</option>
-                @foreach($mapels as $mapel)
-                <option value="{{ $mapel->kode_mapel }}">{{ $mapel->nama_mapel }}</option>
-                @endforeach
-              </select>
-            </div>
-
-            <div class="col-md-6">
               <label for="jurusan" class="form-label">Jurusan</label>
               <select name="jurusan" id="jurusan_tambah" class="form-select" required>
                 <option value="">-- Pilih Jurusan --</option>
@@ -351,6 +340,24 @@
             </div>
 
             <div class="col-md-6">
+              <label for="kode_mapel" class="form-label">Mata Pelajaran</label>
+              <select class="form-select" name="kode_mapel" id="kode_mapel_tambah" required>
+                <option value="">-- Pilih Mapel --</option>
+                @foreach($mapels as $mapel)
+                @foreach($mapel->kelas as $kelas)
+                <option
+                  value="{{ $mapel->kode_mapel }}"
+                  data-kelas="{{ $kelas->kode_kelas }}"
+                  data-jurusan="{{ $kelas->jurusan }}">
+                  {{ $mapel->kode_mapel }}
+                </option>
+                @endforeach
+                @endforeach
+
+              </select>
+            </div>
+
+            <div class="col-md-6">
               <label for="opsi_jawaban" class="form-label">Opsi Jawaban</label>
               <select class="form-select" name="opsi_jawaban" required>
                 <option value="">-- Pilih Opsi Jawaban --</option>
@@ -374,6 +381,59 @@
   </div>
 </div>
 
+<!-- filter mapel -->
+<script>
+  const allMapels = @json($mapels);
+</script>
+<!-- Filter mapel -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const jurusanSelect = document.getElementById('jurusan_tambah');
+    const levelSelect = document.getElementById('level_tambah');
+    const kelasSelect = document.getElementById('kode_kelas_tambah');
+    const mapelSelect = document.getElementById('kode_mapel_tambah');
+
+    function filterMapel() {
+      const selectedJurusan = jurusanSelect.value;
+      const selectedLevel = levelSelect.value;
+      const selectedKelas = kelasSelect.value;
+
+      // Reset mapel
+      mapelSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
+
+      if (!selectedJurusan || !selectedLevel) return;
+
+      const filteredMapels = [];
+
+      allMapels.forEach(mapel => {
+        mapel.kelas.forEach(kelas => {
+          if (
+            kelas.jurusan === selectedJurusan &&
+            kelas.level === selectedLevel &&
+            (selectedKelas === 'ALL' || kelas.kode_kelas === selectedKelas)
+          ) {
+            if (!filteredMapels.find(m => m.kode_mapel === mapel.kode_mapel)) {
+              filteredMapels.push(mapel);
+            }
+          }
+        });
+      });
+
+      filteredMapels.forEach(mapel => {
+        const option = document.createElement('option');
+        option.value = mapel.kode_mapel;
+        option.textContent = mapel.kode_mapel;
+        mapelSelect.appendChild(option);
+      });
+    }
+
+    jurusanSelect.addEventListener('change', filterMapel);
+    levelSelect.addEventListener('change', filterMapel);
+    kelasSelect.addEventListener('change', filterMapel);
+  });
+</script>
+
+<!-- filter kelas modal tambah -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const jurusanSelect = document.getElementById('jurusan_tambah');
@@ -405,6 +465,7 @@
   });
 </script>
 
+<!-- filter kelas modal edit-->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Untuk setiap modal edit
@@ -449,6 +510,69 @@
     });
   });
 </script>
+
+<!-- filter mapel modal edit-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const jurusanEdits = document.querySelectorAll('.jurusan-edit');
+    const levelEdits = document.querySelectorAll('.level-edit');
+    const kelasEdits = document.querySelectorAll('[id^="kode_kelas-"]');
+
+    jurusanEdits.forEach(jurusanSelect => {
+      const id = jurusanSelect.dataset.id;
+      const levelSelect = document.getElementById(`level-${id}`);
+      const kelasSelect = document.getElementById(`kode_kelas-${id}`);
+      const mapelSelect = document.getElementById(`kode_mapel-${id}`);
+
+      function filterMapelEdit() {
+        const selectedJurusan = jurusanSelect.value;
+        const selectedLevel = levelSelect.value;
+        const selectedKelas = kelasSelect.value;
+        const selectedValue = mapelSelect.value;
+
+        mapelSelect.innerHTML = '<option value="">-- Pilih Mapel --</option>';
+
+        if (!selectedJurusan || !selectedLevel) return;
+
+        const filteredMapels = [];
+
+        allMapels.forEach(mapel => {
+          mapel.kelas.forEach(kelas => {
+            if (
+              kelas.jurusan === selectedJurusan &&
+              kelas.level === selectedLevel &&
+              (selectedKelas === 'ALL' || kelas.kode_kelas === selectedKelas)
+            ) {
+              if (!filteredMapels.find(m => m.kode_mapel === mapel.kode_mapel)) {
+                filteredMapels.push(mapel);
+              }
+            }
+          });
+        });
+
+        filteredMapels.forEach(mapel => {
+          const option = document.createElement('option');
+          option.value = mapel.kode_mapel;
+          option.textContent = mapel.kode_mapel;
+
+          if (option.value === selectedValue) {
+            option.selected = true;
+          }
+
+          mapelSelect.appendChild(option);
+        });
+      }
+
+      jurusanSelect.addEventListener('change', filterMapelEdit);
+      levelSelect.addEventListener('change', filterMapelEdit);
+      kelasSelect.addEventListener('change', filterMapelEdit);
+
+      // Panggil saat modal terbuka
+      filterMapelEdit();
+    });
+  });
+</script>
+
 
 
 

@@ -87,7 +87,7 @@
             <td>{{ $setting?->durasi ? $setting->durasi . ' menit' : '-' }}</td>
             <td>{{ $setting?->sesi ?? '-' }}</td>
             <td>{{ $setting?->jenis_tes ?? '-' }}</td>
-            <td>{{ $setting?->token ?? '-' }}</td>
+            <td><span class="badge bg-primary">{{ $setting?->token ?? '-' }}</span></td>
 
             {{-- Status --}}
             <td>

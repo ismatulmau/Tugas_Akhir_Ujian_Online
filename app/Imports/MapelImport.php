@@ -8,6 +8,7 @@ use App\Models\Mapel;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\Log;
+use App\Models\Kelas;
 
 class MapelImport implements ToModel, WithHeadingRow
 {
@@ -17,16 +18,37 @@ class MapelImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         try {
-            // Cek apakah data dengan kode_mapel ini sudah ada
             if (!Mapel::where('kode_mapel', $row['kode_mapel'])->exists()) {
-                $this->berhasil++;
-                return new Mapel([
+                $mapel = new Mapel([
                     'kode_mapel' => $row['kode_mapel'],
                     'nama_mapel' => $row['nama_mapel'],
                     'persen_uts' => $row['persen_uts'],
                     'persen_uas' => $row['persen_uas'],
                     'kkm'        => $row['kkm'],
                 ]);
+                $mapel->save();
+
+                // Tambahkan relasi ke kelas jika ada
+                if (!empty($row['kelas'])) {
+                    $kodeKelasArray = array_map('trim', explode(',', $row['kelas']));
+
+                    $kelasIds = Kelas::whereIn('kode_kelas', $kodeKelasArray)->pluck('kode_kelas')->toArray();
+
+                    // Cek jika ada kode yang tidak ditemukan
+                    $foundKelas = array_keys($kelasIds);
+                    $notFoundKelas = array_diff($kodeKelasArray, $foundKelas);
+
+                    if (!empty($notFoundKelas)) {
+                        Log::warning('Kode kelas tidak ditemukan: ' . implode(', ', $notFoundKelas));
+                    }
+
+                    $mapel->kelas()->syncWithoutDetaching(array_values($kelasIds));
+
+                }
+
+
+                $this->berhasil++;
+                return null; // karena sudah disimpan manual
             } else {
                 $this->duplikat++;
             }
@@ -35,8 +57,5 @@ class MapelImport implements ToModel, WithHeadingRow
         }
 
         return null;
-        }
-    
+    }
 }
-
-

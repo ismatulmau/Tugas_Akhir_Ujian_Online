@@ -2,12 +2,12 @@
     <div class="main-header-logo">
         <div class="logo-header" data-background-color="dark">
             <a href="#" class="logo">
-    @if(!empty($dataSekolah->logo) && file_exists(public_path('storage/' . $dataSekolah->logo)))
-        <img src="{{ asset('storage/' . $dataSekolah->logo) }}" alt="Logo Sekolah" class="navbar-brand" height="20">
-    @else
-        <img src="{{ asset('assets/img/default-logo.png') }}" alt="Default Logo" class="navbar-brand" height="20">
-    @endif
-</a>
+                @if(!empty($dataSekolah->logo) && file_exists(public_path('storage/' . $dataSekolah->logo)))
+                <img src="{{ asset('storage/' . $dataSekolah->logo) }}" alt="Logo Sekolah" class="navbar-brand" height="20">
+                @else
+                <img src="{{ asset('assets/img/default-logo.png') }}" alt="Default Logo" class="navbar-brand" height="20">
+                @endif
+            </a>
             <div class="nav-toggle">
                 <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
                 <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>

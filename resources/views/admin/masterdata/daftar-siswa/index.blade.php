@@ -165,16 +165,40 @@
                                                             value="{{ $siswa->nomor_induk }}" required>
                                                     </div>
                                                     <div class="col-md-6">
+                                                        <label class="form-label">Jurusan</label>
+                                                        <select class="form-select" name="jurusan" id="edit-jurusan-{{ $siswa->id_siswa }}" required>
+                                                            @foreach($jurusan as $jrs)
+                                                            <option value="{{ $jrs->jurusan }}"
+                                                                {{ $siswa->jurusan == $jrs->jurusan ? 'selected' : '' }}>
+                                                                {{ $jrs->jurusan }}
+                                                            </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Level</label>
+                                                        <select class="form-select" name="level" id="edit-level-{{ $siswa->id_siswa }}" required>
+                                                            <option value="X" {{ $siswa->level == 'X' ? 'selected' : '' }}>X</option>
+                                                            <option value="XI" {{ $siswa->level == 'XI' ? 'selected' : '' }}>XI</option>
+                                                            <option value="XII" {{ $siswa->level == 'XII' ? 'selected' : '' }}>XII</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-md-6">
                                                         <label class="form-label">Kelas</label>
-                                                        <select class="form-select" name="kode_kelas" required>
+                                                        <select class="form-select" name="kode_kelas" id="edit-kelas-{{ $siswa->id_siswa }}" required>
                                                             @foreach($kelas as $kls)
                                                             <option value="{{ $kls->kode_kelas }}"
+                                                                data-jurusan="{{ $kls->jurusan }}"
+                                                                data-level="{{ $kls->level }}"
                                                                 {{ $kls->kode_kelas == $siswa->kode_kelas ? 'selected' : '' }}>
                                                                 {{ $kls->nama_kelas }}
                                                             </option>
                                                             @endforeach
                                                         </select>
                                                     </div>
+
                                                     <div class="col-md-6">
                                                         <label class="form-label">Jenis Kelamin</label>
                                                         <select class="form-select" name="jenis_kelamin" required>
@@ -197,30 +221,7 @@
                                                         <input type="text" class="form-control" name="agama"
                                                             value="{{ $siswa->agama }}" required>
                                                     </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Level</label>
-                                                        <select class="form-select" name="level" required>
-                                                            <option value="X"
-                                                                {{ $siswa->level == 'X' ? 'selected' : '' }}>X</option>
-                                                            <option value="XI"
-                                                                {{ $siswa->level == 'XI' ? 'selected' : '' }}>XI
-                                                            </option>
-                                                            <option value="XII"
-                                                                {{ $siswa->level == 'XII' ? 'selected' : '' }}>XII
-                                                            </option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Jurusan</label>
-                                                        <select class="form-select" name="jurusan" required>
-                                                            @foreach($jurusan as $jrs)
-                                                            <option value="{{ $jrs->jurusan }}"
-                                                                {{ $siswa->jurusan == $jrs->jurusan ? 'selected' : '' }}>
-                                                                {{ $jrs->jurusan }}
-                                                            </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+
                                                     <div class="col-md-6">
                                                         <label class="form-label">Sesi Ujian</label>
                                                         <input type="text" class="form-control" name="sesi_ujian"
@@ -252,6 +253,50 @@
                                     </form>
                                 </div>
                             </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const modal = document.getElementById('modalEditSiswa{{ $siswa->id_siswa }}');
+
+                                    modal.addEventListener('shown.bs.modal', function() {
+                                        const jurusanEdit = document.getElementById('edit-jurusan-{{ $siswa->id_siswa }}');
+                                        const levelEdit = document.getElementById('edit-level-{{ $siswa->id_siswa }}');
+                                        const kelasEdit = document.getElementById('edit-kelas-{{ $siswa->id_siswa }}');
+
+                                        if (jurusanEdit && levelEdit && kelasEdit) {
+                                            const allEditOptions = Array.from(kelasEdit.querySelectorAll('option'));
+                                            const selectedValue = kelasEdit.value;
+
+                                            function filterEditKelas() {
+                                                const selectedJurusan = jurusanEdit.value;
+                                                const selectedLevel = levelEdit.value;
+
+                                                kelasEdit.innerHTML = '';
+
+                                                allEditOptions.forEach(option => {
+                                                    const jurusan = option.dataset.jurusan;
+                                                    const level = option.dataset.level;
+
+                                                    if (jurusan === selectedJurusan && level === selectedLevel) {
+                                                        kelasEdit.appendChild(option);
+                                                    }
+                                                });
+
+                                                // Kembalikan nilai yang terpilih jika masih ada
+                                                const stillExists = Array.from(kelasEdit.options).some(opt => opt.value === selectedValue);
+                                                if (stillExists) {
+                                                    kelasEdit.value = selectedValue;
+                                                }
+                                            }
+
+                                            jurusanEdit.addEventListener('change', filterEditKelas);
+                                            levelEdit.addEventListener('change', filterEditKelas);
+
+                                            filterEditKelas(); // langsung jalankan saat modal dibuka
+                                        }
+                                    });
+                                });
+                            </script>
+
 
                             @endforeach
                         </tbody>
@@ -286,14 +331,41 @@
                             <label for="nomor_induk" class="form-label">Nomor Induk</label>
                             <input type="text" class="form-control" name="nomor_induk" required>
                         </div>
+
                         <div class="col-md-6">
-                            <label for="kode_kelas" class="form-label">Kelas</label>
-                            <select class="form-select" name="kode_kelas" required>
-                                <option value="">-- Pilih Kelas --</option>
-                                @foreach($kelas as $kls)
-                                <option value="{{ $kls->kode_kelas }}">{{ $kls->nama_kelas }}</option>
+                            <label for="jurusan" class="form-label">Jurusan</label>
+                            <select class="form-select" name="jurusan" id="filter-jurusan" required>
+                                <option value="">-- Pilih Jurusan --</option>
+                                @foreach($jurusan as $jrs)
+                                <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="level" class="form-label">Level</label>
+                            <select class="form-select" name="level" id="filter-level" required>
+                                <option value="">-- Pilih Level --</option>
+                                <option value="X">X</option>
+                                <option value="XI">XI</option>
+                                <option value="XII">XII</option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <label for="kode_kelas" class="form-label">Kelas</label>
+                            <select class="form-select" name="kode_kelas" id="kode_kelas" required>
+                                <option value="">-- Pilih Kelas --</option>
+                                @foreach($kelas as $kls)
+                                <option
+                                    value="{{ $kls->kode_kelas }}"
+                                    data-jurusan="{{ $kls->jurusan }}"
+                                    data-level="{{ $kls->level }}">
+                                    {{ $kls->nama_kelas }}
+                                </option>
+                                @endforeach
+                            </select>
+
                         </div>
                         <div class="col-md-6">
                             <label for="jenis_kelamin" class="form-label">Jenis Kelamin</label>
@@ -310,26 +382,6 @@
                         <div class="col-md-6">
                             <label for="agama" class="form-label">Agama</label>
                             <input type="text" class="form-control" name="agama" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="level" class="form-label">Level</label>
-                            <select class="form-select" name="level" required>
-                                <option value="">-- Pilih Level --</option>
-                                <option value="X">X</option>
-                                <option value="XI">XI</option>
-                                <option value="XII">XII</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="jurusan" class="form-label">Jurusan</label>
-                            <select class="form-select" name="jurusan" required>
-                                <option value="">-- Pilih Jurusan --</option>
-                                @foreach($jurusan as $jrs)
-                                <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
-                                @endforeach
-                            </select>
                         </div>
 
                         <div class="col-md-6">
@@ -396,20 +448,20 @@
 <div class="modal fade" id="modalCetakKartu" tabindex="-1" aria-labelledby="modalCetakKartuLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('siswa.cetak-kartu') }}" method="POST">
+            <form action="{{ route('siswa.cetak-kartu') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalCetakKartuLabel">Filter Cetak Kartu Ujian</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="modalCetakKartuLabel">Cetak Kartu Ujian</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-3 align-items-start">
+                    <div class="row g-3">
                         <!-- Kolom Kiri -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="jurusan" class="form-label">Jurusan</label>
-                                <select class="form-select" name="jurusan" id="jurusan" required>
-                                    <option value="">-- Pilih Jurusan --</option>
+                                <label for="jurusan" class="form-label">Jurusan <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" name="jurusan" id="jurusan" required>
+                                    <option value="">Pilih Jurusan</option>
                                     @foreach($jurusan as $jrs)
                                     <option value="{{ $jrs->jurusan }}">{{ $jrs->jurusan }}</option>
                                     @endforeach
@@ -417,13 +469,11 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="kelas" class="form-label">Kelas</label>
-                                <select class="form-select" id="nama_kelas" name="nama_kelas" required>
-                                    <option value="">-- Pilih Kelas --</option>
+                                <label for="kelas" class="form-label">Kelas <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="nama_kelas" name="nama_kelas" required>
+                                    <option value="">Pilih Kelas</option>
                                     @foreach($kelas as $kls)
-                                    <option
-                                        value="{{ $kls->nama_kelas }}"
-                                        data-jurusan="{{ $kls->jurusan }}">
+                                    <option value="{{ $kls->nama_kelas }}" data-jurusan="{{ $kls->jurusan }}">
                                         {{ $kls->nama_kelas }}
                                     </option>
                                     @endforeach
@@ -431,85 +481,194 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="jenis_ujian" class="form-label">Jenis Ujian</label>
-                                <input type="text" class="form-control" id="jenis_ujian" name="jenis_ujian"
-                                    value="{{ $dataSekolah->jenis_tes ?? '-' }}" readonly>
+                                <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
+                                <input type="text" class="form-control form-control-sm" id="nama_kepala" name="nama_kepala"
+                                    value="{{ $dataSekolah->nama_kepala_sekolah ?? '-' }}" readonly>
                             </div>
                         </div>
 
                         <!-- Kolom Kanan -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
-                                <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran"
-                                    value="{{ $dataSekolah->tahun_pelajaran ?? '-' }}" readonly>
+                                <label class="form-label">Jenis Ujian</label>
+                                <input type="text" name="jenis_ujian" class="form-control form-control-sm" value="{{ $dataSekolah->jenis_tes ?? '-' }}" readonly>
                             </div>
 
                             <div class="mb-3">
-                                <label for="nama_kepala" class="form-label">Nama Kepala Sekolah</label>
-                                <input type="text" class="form-control" id="nama_kepala" name="nama_kepala"
-                                    value="{{ $dataSekolah->nama_kepala_sekolah ?? '-' }}" readonly>
+                                <label class="form-label">Tahun Pelajaran</label>
+                                <input type="text" name="tahun_pelajaran" class="form-control form-control-sm" value="{{ $dataSekolah->tahun_pelajaran ?? '-' }}" readonly>
                             </div>
 
                             <div class="mb-3">
                                 <label for="nip_kepala" class="form-label">NIP Kepala Sekolah</label>
-                                <input type="text" class="form-control" id="nip_kepala" name="nip_kepala"
+                                <input type="text" class="form-control form-control-sm" id="nip_kepala" name="nip_kepala"
                                     value="{{ $dataSekolah->nip_kepala_sekolah ?? '-' }}" readonly>
                             </div>
                         </div>
-
                     </div>
 
+                    <!-- Jadwal Ujian -->
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-3">Jadwal Ujian</h6>
 
-                    <!-- Jadwal Ujian (Full Width) -->
-                    <div class="mb-3">
-                        <label class="form-label">Jadwal Ujian</label>
-                        <small class="d-block text-muted mb-2">Klik "Tambah" untuk menambahkan jadwal:</small>
-
-                        <div id="jadwal-wrapper">
-                            <div class="row g-2 mb-2 align-items-center">
-                                <div class="col-md-2">
-                                    <input type="text" name="jadwal[0][hari]" class="form-control hari" placeholder="Hari" readonly>
+                        <!-- Impor Jadwal -->
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body p-3">
+                                <h6 class="card-title mb-2 fs-6">Impor dari Excel</h6>
+                                <div class="mb-2">
+                                    <input type="file" class="form-control form-control-sm" name="file_jadwal" id="file_jadwal" accept=".xlsx,.xls">
+                                    <small class="text-muted">Impor jadwal dari file excel</small>
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="date" name="jadwal[0][tanggal]" class="form-control tanggal">
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <input type="time" name="jadwal[0][jam_mulai]" class="form-control" required>
-                                        <span class="input-group-text">s/d</span>
-                                        <input type="time" name="jadwal[0][jam_selesai]" class="form-control" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <select name="jadwal[0][mapel]" class="form-select" required>
-                                        <option value="">-- Pilih Mapel --</option>
-                                        @foreach($mapel as $mp)
-                                        <option value="{{ $mp->nama_mapel }}">{{ $mp->nama_mapel }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <a href="{{ route('jadwal.template') }}" class="btn btn-sm btn-outline-success mt-1">
+                                    <i class="fas fa-download me-1"></i> Download Template
+                                </a>
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="tambahJadwal()">
-                            <i class="fas fa-plus"></i> Tambah Jadwal
-                        </button>
+                        <!-- Input Manual -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-3">
+                                <h6 class="card-title mb-2 fs-6">Input Manual</h6>
+                                <div id="jadwal-wrapper">
+                                    <div class="row g-2 mb-2 align-items-center">
+                                        <!-- Hari (2 kolom) -->
+                                        <div class="col-md-2">
+                                            <input type="text" name="jadwal[0][hari]" class="form-control form-control-sm hari" placeholder="Hari" readonly>
+                                        </div>
+
+                                        <!-- Tanggal (2 kolom) -->
+                                        <div class="col-md-2">
+                                            <input type="date" name="jadwal[0][tanggal]" class="form-control form-control-sm tanggal">
+                                        </div>
+
+                                        <!-- Jam Mulai (2 kolom) -->
+                                        <div class="col-md-2">
+                                            <input type="time" name="jadwal[0][jam_mulai]" class="form-control form-control-sm" placeholder="Mulai" required>
+                                        </div>
+
+                                        <!-- Jam Selesai (2 kolom) -->
+                                        <div class="col-md-2">
+                                            <input type="time" name="jadwal[0][jam_selesai]" class="form-control form-control-sm" placeholder="Selesai" required>
+                                        </div>
+
+                                        <!-- Mapel (4 kolom) -->
+                                        <div class="col-md-4">
+                                            <select name="jadwal[0][mapel]" class="form-select form-select-sm" required>
+                                                <option value="">Pilih Mata Pelajaran</option>
+                                                @foreach($mapel as $mp)
+                                                <option value="{{ $mp->nama_mapel }}">{{ $mp->nama_mapel }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="tambahJadwal()">
+                                    <i class="fas fa-plus me-1"></i> Tambah Jadwal
+                                </button>
+                            </div>
+                        </div>
                     </div>
-
-
                 </div>
-
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-print"></i> Cetak Kartu
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="fas fa-print me-1"></i> Cetak Kartu
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- ajax -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- impor jadwal -->
+<script>
+    document.getElementById('file_jadwal').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {
+                type: 'array'
+            });
+
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            const wrapper = document.getElementById('jadwal-wrapper');
+            wrapper.innerHTML = ''; // Bersihkan data sebelumnya
+
+            jsonData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.classList.add('row', 'g-2', 'mb-2', 'align-items-center');
+
+                row.innerHTML = `
+                <!-- Hari (2 kolom) -->
+                <div class="col-md-2">
+                    <input type="text" name="jadwal[${index}][hari]" class="form-control form-control-sm hari" value="${item.Hari || ''}" readonly>
+                </div>
+
+                <!-- Tanggal (2 kolom) -->
+                <div class="col-md-2">
+                    <input type="date" name="jadwal[${index}][tanggal]" class="form-control form-control-sm tanggal" value="${convertToDate(item.Tanggal)}">
+                </div>
+
+                <!-- Jam Mulai (2 kolom) -->
+                <div class="col-md-2">
+                    <input type="time" name="jadwal[${index}][jam_mulai]" class="form-control form-control-sm" value="${formatJam(item['Jam Mulai'])}" required>
+                </div>
+
+                <!-- Jam Selesai (2 kolom) -->
+                <div class="col-md-2">
+                    <input type="time" name="jadwal[${index}][jam_selesai]" class="form-control form-control-sm" value="${formatJam(item['Jam Selesai'])}" required>
+                </div>
+
+                <!-- Mapel (4 kolom) -->
+                <div class="col-md-4">
+                    <input type="text" name="jadwal[${index}][mapel]" class="form-control form-control-sm" value="${item.Mapel || ''}" required>
+                </div>
+            `;
+
+                wrapper.appendChild(row);
+
+                // Bind tanggal ke hari
+                const inputTanggal = row.querySelector('.tanggal');
+                const inputHari = row.querySelector('.hari');
+                bindTanggalKeHari(inputTanggal, inputHari);
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+
+    function formatJam(jam) {
+        if (!jam) return '';
+        if (typeof jam === 'number') {
+            const totalMinutes = Math.round(jam * 24 * 60);
+            const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+            const minutes = String(totalMinutes % 60).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // Jika dalam format string "07.00", ubah jadi "07:00"
+        return jam.replace('.', ':');
+    }
+
+
+    function convertToDate(excelDate) {
+        if (!excelDate) return '';
+        const date = new Date((excelDate - 25569) * 86400 * 1000);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+</script>
 
 <!-- function tambah jadwal -->
 <script>
@@ -538,11 +697,10 @@
     function tambahJadwal() {
         const wrapper = document.getElementById('jadwal-wrapper');
         const row = document.createElement('div');
-        row.classList.add('row', 'g-2', 'mb-2');
+        row.classList.add('row', 'g-2', 'mb-2', 'align-items-center');
 
         const minDate = getTanggalHariIni();
 
-        // Template dropdown mapel dari backend (Laravel Blade), ubah ke dalam JavaScript string
         const mapelOptions = `
         @foreach($mapel as $mp)
             <option value="{{ $mp->nama_mapel }}">{{ $mp->nama_mapel }}</option>
@@ -550,27 +708,34 @@
     `;
 
         row.innerHTML = `
-    <div class="col-md-2">
-        <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control hari" placeholder="Hari" readonly>
-    </div>
-    <div class="col-md-3">
-        <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control tanggal" min="${minDate}">
-    </div>
-    <div class="col-md-4">
-        <div class="input-group">
-            <input type="time" name="jadwal[${jadwalIndex}][jam_mulai]" class="form-control" required>
-            <span class="input-group-text">s/d</span>
-            <input type="time" name="jadwal[${jadwalIndex}][jam_selesai]" class="form-control" required>
+        <!-- Hari (2 kolom) -->
+        <div class="col-md-2">
+            <input type="text" name="jadwal[${jadwalIndex}][hari]" class="form-control form-control-sm hari" placeholder="Hari" readonly>
         </div>
-    </div>
-    <div class="col-md-3">
-        <select name="jadwal[${jadwalIndex}][mapel]" class="form-select" required>
-            <option value="">-- Pilih Mapel --</option>
-            ${mapelOptions}
-        </select>
-    </div>
-`;
 
+        <!-- Tanggal (2 kolom) -->
+        <div class="col-md-2">
+            <input type="date" name="jadwal[${jadwalIndex}][tanggal]" class="form-control form-control-sm tanggal" min="${minDate}">
+        </div>
+
+        <!-- Jam Mulai (2 kolom) -->
+        <div class="col-md-2">
+            <input type="time" name="jadwal[${jadwalIndex}][jam_mulai]" class="form-control form-control-sm" required>
+        </div>
+
+        <!-- Jam Selesai (2 kolom) -->
+        <div class="col-md-2">
+            <input type="time" name="jadwal[${jadwalIndex}][jam_selesai]" class="form-control form-control-sm" required>
+        </div>
+
+        <!-- Mapel (4 kolom) -->
+        <div class="col-md-4">
+            <select name="jadwal[${jadwalIndex}][mapel]" class="form-select form-select-sm" required>
+                <option value="">Pilih Mata Pelajaran</option>
+                ${mapelOptions}
+            </select>
+        </div>
+    `;
 
         wrapper.appendChild(row);
 
@@ -594,7 +759,6 @@
         }
     });
 </script>
-
 
 <!-- Modal Upload Massal -->
 <div class="modal fade" id="modalUploadMassal" tabindex="-1" aria-labelledby="modalUploadMassalLabel"
@@ -623,7 +787,6 @@
         </form>
     </div>
 </div>
-
 </div>
 
 <!-- filter kelas -->
@@ -650,6 +813,40 @@
                 }
             });
         });
+    });
+</script>
+
+<!-- filter kelas modal tambah siswa -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const jurusanSelect = document.getElementById('filter-jurusan');
+        const levelSelect = document.getElementById('filter-level');
+        const kelasSelect = document.getElementById('kode_kelas');
+
+        // Simpan semua opsi kelas
+        const allOptions = Array.from(kelasSelect.querySelectorAll('option'));
+
+        function filterKelasOptions() {
+            const selectedJurusan = jurusanSelect.value;
+            const selectedLevel = levelSelect.value;
+
+            // Reset opsi kelas
+            kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+
+            allOptions.forEach(option => {
+                if (option.value === "") return;
+
+                const jurusan = option.getAttribute('data-jurusan');
+                const level = option.getAttribute('data-level');
+
+                if (jurusan === selectedJurusan && level === selectedLevel) {
+                    kelasSelect.appendChild(option);
+                }
+            });
+        }
+
+        jurusanSelect.addEventListener('change', filterKelasOptions);
+        levelSelect.addEventListener('change', filterKelasOptions);
     });
 </script>
 

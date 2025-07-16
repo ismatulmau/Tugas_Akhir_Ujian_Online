@@ -20,5 +20,9 @@ class Kelas extends Model
         'nama_kelas',
     ];
 
-    
+    public function mapels()
+{
+    return $this->belongsToMany(Mapel::class, 'kelas_mapel', 'kode_kelas', 'kode_mapel');
+}
+
 }

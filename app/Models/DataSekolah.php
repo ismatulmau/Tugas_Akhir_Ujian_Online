@@ -12,6 +12,7 @@ class DataSekolah extends Model
     // Kolom yang dapat diisi secara massal
     protected $fillable = [
         'nama_sekolah',
+        'alamat',
         'logo',
         'semester',
         'tahun_pelajaran',

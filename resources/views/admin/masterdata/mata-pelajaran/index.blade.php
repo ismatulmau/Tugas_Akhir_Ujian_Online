@@ -54,6 +54,7 @@
                 <th>% UTS</th>
                 <th>% UAS</th>
                 <th>KKM</th>
+                <th>Kelas</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -66,6 +67,13 @@
                 <td>{{ $mapel->persen_uts}}</td>
                 <td>{{ $mapel->persen_uas}}</td>
                 <td>{{ $mapel->kkm }}</td>
+                <td>
+                  @forelse($mapel->kelas as $kls)
+                  <span>{{ $kls->nama_kelas }}</span><br>
+                  @empty
+                  <span class="text-muted">Belum ada</span>
+                  @endforelse
+                </td>
                 <td style="vertical-align: middle;">
                   <div class="d-flex gap-2 align-items-center" style="height: 100%;">
                     <button class="btn btn-sm btn-warning p-2" data-bs-toggle="modal" data-bs-target="#modalEditMapel{{ $mapel->kode_mapel }}" title="Edit" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
@@ -96,6 +104,44 @@
                       <div class="modal-body">
                         <div class="row g-3">
                           <div class="col-md-6">
+                            <label for="jurusan" class="form-label">Jurusan</label>
+                            <select class="form-select" onchange="filterKelasByJurusanEdit(this.value, '{{ $mapel->kode_mapel }}')" id="selectJurusanEdit{{ $mapel->kode_mapel }}">
+                              <option value="">Pilih Jurusan</option>
+                              @foreach($jurusanList as $jur)
+                              <option value="{{ $jur }}" {{ $mapel->kelas->first()?->jurusan == $jur ? 'selected' : '' }}>{{ $jur }}</option>
+                              @endforeach
+                            </select>
+
+                          </div>
+
+                          <div class="col-md-12">
+                            <label class="form-label d-block">Pilih Kelas</label>
+                            <div class="row" id="checkbox-kelas-edit-{{ $mapel->kode_mapel }}">
+                              @foreach($kelas as $kls)
+                              @php
+                              $jurusanMapel = $mapel->kelas->first()?->jurusan;
+                              $tampil = $jurusanMapel == $kls->jurusan;
+                              @endphp
+                              <div class="col-md-3 kelas-checkbox-edit"
+                                data-jurusan="{{ $kls->jurusan }}"
+                                style="{{ $tampil ? '' : 'display: none;' }}">
+                                <div class="form-check">
+                                  <input class="form-check-input"
+                                    type="checkbox"
+                                    name="kelas[]"
+                                    value="{{ $kls->kode_kelas }}"
+                                    id="kelasEdit{{ $mapel->kode_mapel }}{{ $loop->index }}"
+                                    {{ $mapel->kelas->contains('kode_kelas', $kls->kode_kelas) ? 'checked' : '' }}>
+                                  <label class="form-check-label" for="kelasEdit{{ $mapel->kode_mapel }}{{ $loop->index }}">
+                                    {{ $kls->nama_kelas }}
+                                  </label>
+                                </div>
+                              </div>
+                              @endforeach
+
+                            </div>
+                          </div>
+                          <div class="col-md-6">
                             <label for="kode_mapel" class="form-label">Kode Mapel</label>
                             <input type="text" class="form-control" name="kode_mapel" value="{{ $mapel->kode_mapel }}" required>
                           </div>
@@ -115,6 +161,7 @@
                             <label for="kkm" class="form-label">KKM</label>
                             <input type="text" class="form-control" name="kkm" value="{{ $mapel->kkm }}" required>
                           </div>
+
                         </div>
                       </div>
                       <div class="modal-footer">
@@ -146,6 +193,35 @@
         </div>
         <div class="modal-body">
           <div class="row g-3">
+            <div class="col-md-6">
+              <label for="jurusan" class="form-label">Jurusan</label>
+              <select id="jurusan" class="form-select" onchange="filterKelasByJurusan(this.value)">
+                <option value="">Pilih Jurusan</option>
+                @foreach($jurusanList as $jur)
+                <option value="{{ $jur }}">{{ $jur }}</option>
+                @endforeach
+              </select>
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label d-block">Pilih Kelas</label>
+              <p id="kelas-placeholder" class="text-muted">Silakan pilih jurusan terlebih dahulu.</p>
+              <div class="row" id="checkbox-kelas">
+                @forelse($kelas as $kls)
+                @if(is_object($kls) && isset($kls->jurusan))
+                <div class="col-md-3 kelas-checkbox" data-jurusan="{{ $kls->jurusan }}" style="display: none;">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="kelas[]" value="{{ $kls->kode_kelas }}" id="kelas{{ $loop->index }}">
+                    <label class="form-check-label" for="kelas{{ $loop->index }}">{{ $kls->nama_kelas }}</label>
+                  </div>
+                </div>
+                @endif
+                @empty
+                <p class="text-muted">Tidak ada data kelas.</p>
+                @endforelse
+              </div>
+            </div>
+
             <div class="col-md-6">
               <label for="kode_mapel" class="form-label">Kode Mapel</label>
               <input type="text" class="form-control" name="kode_mapel" required>
@@ -211,4 +287,42 @@
     </div>
   </div>
 </div>
+
+<!-- filter kelas -->
+<script>
+  function filterKelasByJurusan(selectedJurusan) {
+    const kelasCheckboxes = document.querySelectorAll('#checkbox-kelas .kelas-checkbox');
+    document.getElementById('kelas-placeholder').style.display = selectedJurusan ? 'none' : 'block';
+
+    kelasCheckboxes.forEach(item => {
+      const jurusan = item.getAttribute('data-jurusan');
+      if (!selectedJurusan || jurusan === selectedJurusan) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        checkbox.checked = false;
+      }
+    });
+  }
+
+  function filterKelasByJurusanEdit(selectedJurusan, mapelKode) {
+    const kelasCheckboxes = document.querySelectorAll(`#checkbox-kelas-edit-${mapelKode} .kelas-checkbox-edit`);
+    kelasCheckboxes.forEach(item => {
+      const jurusan = item.getAttribute('data-jurusan');
+      if (!selectedJurusan || jurusan === selectedJurusan) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        checkbox.checked = false;
+      }
+    });
+  }
+</script>
+
+
+
+
+
 @endsection

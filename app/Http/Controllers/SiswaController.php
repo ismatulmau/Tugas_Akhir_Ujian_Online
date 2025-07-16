@@ -14,7 +14,9 @@ use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use App\Exports\SiswaTemplateExport;
+use App\Exports\TemplateJadwalUjianExport;
 use App\Models\DataSekolah;
+use App\Imports\JadwalUjianImport;
 
 class SiswaController extends Controller
 {
@@ -182,6 +184,11 @@ class SiswaController extends Controller
         return Excel::download(new SiswaTemplateExport, 'Template_Import_Siswa.xlsx');
     }
 
+    public function downloadTemplateKartu()
+{
+    return Excel::download(new TemplateJadwalUjianExport, 'template_jadwal_ujian.xlsx');
+}
+
     public function import(Request $request)
     {
         $request->validate([
@@ -240,65 +247,79 @@ class SiswaController extends Controller
         return back()->with('success', "Semua gambar berhasil diupload dan disimpan ke database ($berhasil foto).");
     }
 
-    public function cetakKartu(Request $request)
-    {
-        $request->validate([
-            'jurusan' => 'required',
-            'nama_kelas' => 'required',
-            'jenis_ujian' => 'required',
-            'jadwal' => 'array',
-            'jadwal.*.hari' => 'nullable|string',
-            'jadwal.*.tanggal' => 'nullable|date',
-            'jadwal.*.jam_mulai' => 'nullable|date_format:H:i',
-            'jadwal.*.jam_selesai' => 'nullable|date_format:H:i',
-            'jadwal.*.mapel' => 'nullable|string',
-        ]);
+public function cetakKartu(Request $request)
+{
+    $request->validate([
+        'jurusan' => 'required',
+        'nama_kelas' => 'required',
+        'jenis_ujian' => 'required',
+        'jadwal' => 'array',
+        'jadwal.*.hari' => 'nullable|string',
+        'jadwal.*.tanggal' => 'nullable|date',
+        'jadwal.*.jam_mulai' => 'nullable|date_format:H:i',
+        'jadwal.*.jam_selesai' => 'nullable|date_format:H:i',
+        'jadwal.*.mapel' => 'nullable|string',
+        'file_jadwal' => 'nullable|file|mimes:xlsx,xls'
+    ]);
 
-        $dataSekolah = DataSekolah::first();
+    $dataSekolah = DataSekolah::first();
 
-        $query = Siswa::query();
-
-        if ($request->jurusan !== 'all') {
-            $query->where('jurusan', $request->jurusan);
-        }
-
-        if ($request->nama_kelas !== 'all') {
-            $query->where('kode_kelas', function ($sub) use ($request) {
-                $sub->select('kode_kelas')->from('kelas')->where('nama_kelas', $request->nama_kelas);
-            });
-        }
-
-        $siswas = $query->get();
-
-        if ($siswas->isEmpty()) {
-            return back()->with('error', 'Tidak ada data siswa untuk kriteria tersebut');
-        }
-
-        $jadwalUjian = collect($request->jadwal)
-            ->map(function ($item) {
-                $item['jam'] = ($item['jam_mulai'] ?? '') . ' - ' . ($item['jam_selesai'] ?? '');
-                return $item;
-            })
-            ->filter(fn($item) => !empty($item['hari']) || !empty($item['tanggal']) || !empty($item['jam']) || !empty($item['mapel']))
-            ->groupBy(function ($item) {
-                $hari = $item['hari'] ?? '-';
-                $tanggal = $item['tanggal'] ?? '-';
-                return $hari . '|' . $tanggal;
-            });
-
-
-
-        $pdf = Pdf::loadView('siswa.cetak-kartu', [
-            'siswas' => $siswas,
-            'jenis_ujian' => $request->jenis_ujian,
-            'tahun_pelajaran' => $dataSekolah->tahun_pelajaran ?? '-',
-            'nama_kepala' => $dataSekolah->nama_kepala_sekolah ?? '-',
-            'nip_kepala' => $dataSekolah->nip_kepala_sekolah ?? '-',
-            'jadwalUjian' => $jadwalUjian,
-        ]);
-
-        return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
+    // Query siswa
+    $query = Siswa::query();
+    if ($request->jurusan !== 'all') {
+        $query->where('jurusan', $request->jurusan);
     }
+    if ($request->nama_kelas !== 'all') {
+        $query->where('kode_kelas', function ($sub) use ($request) {
+            $sub->select('kode_kelas')->from('kelas')->where('nama_kelas', $request->nama_kelas);
+        });
+    }
+    $siswas = $query->get();
+    if ($siswas->isEmpty()) {
+        return back()->with('error', 'Tidak ada data siswa untuk kriteria tersebut');
+    }
+
+    // Proses jadwal manual
+    $jadwalManual = collect($request->jadwal ?? [])->map(function ($item) {
+        $item['jam'] = ($item['jam_mulai'] ?? '') . ' - ' . ($item['jam_selesai'] ?? '');
+        return $item;
+    })->filter(fn($item) => !empty($item['mapel']));
+
+    // Proses jadwal dari Excel jika ada
+    $jadwalExcel = collect();
+    if ($request->hasFile('file_jadwal')) {
+        $import = new JadwalUjianImport();
+        Excel::import($import, $request->file('file_jadwal'));
+        $jadwalExcel = collect($import->jadwal)->map(function ($item) {
+            $item['jam'] = $item['jam_mulai'] . ' - ' . $item['jam_selesai'];
+            return $item;
+        })->filter(fn($item) => !empty($item['mapel']));
+    }
+
+    // Gabungkan kedua sumber data
+    $jadwalGabungan = $jadwalManual->merge($jadwalExcel)
+        ->unique(function ($item) {
+            return $item['hari'].$item['tanggal'].$item['jam_mulai'].$item['jam_selesai'].$item['mapel'];
+        });
+
+    // Group by hari dan tanggal
+    $jadwalUjian = $jadwalGabungan->groupBy(function ($item) {
+        return ($item['hari'] ?? '-') . '|' . ($item['tanggal'] ?? '-');
+    });
+
+    // Generate PDF
+    $pdf = Pdf::loadView('siswa.cetak-kartu', [
+        'siswas' => $siswas,
+        'jenis_ujian' => $request->jenis_ujian,
+        'tahun_pelajaran' => $dataSekolah->tahun_pelajaran ?? '-',
+        'nama_kepala' => $dataSekolah->nama_kepala_sekolah ?? '-',
+        'nip_kepala' => $dataSekolah->nip_kepala_sekolah ?? '-',
+        'jadwalUjian' => $jadwalUjian,
+    ]);
+
+    return $pdf->stream('kartu-ujian-' . now()->format('Ymd') . '.pdf');
+}
+
 
     public function dataPeserta()
     {

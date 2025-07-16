@@ -52,6 +52,8 @@ Route::middleware('admin')->group(function () {
     Route::post('/siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
     Route::post('/siswa/upload-gambar-massal', [SiswaController::class, 'uploadGambarMassal'])->name('siswa.uploadGambarMassal');
     Route::get('/template-import-siswa', [SiswaController::class, 'downloadTemplate'])->name('siswa.downloadTemplate');
+    Route::get('/template-jadwal-ujian', [SiswaController::class, 'downloadTemplateKartu'])->name('jadwal.template');
+
 
     //DAFTAR MATA PELAJARAN
     Route::get('/mapel/index', [MataPelajaranController::class, 'index'])->name('mapel.index');
@@ -93,6 +95,7 @@ Route::middleware('admin')->group(function () {
     // Menampilkan halaman rekap nilai berdasarkan bank soal
     Route::get('/rekap-nilai', [RekapNilaiController::class, 'index'])->name('rekap.nilai.index');
     Route::get('/rekap/export/{id_sett_ujian}', [RekapNilaiController::class, 'exportExcel'])->name('rekap.nilai.export');
+    Route::get('/rekap/export-pdf/{id_sett_ujian}', [RekapNilaiController::class, 'exportPdf'])->name('rekap.nilai.exportPdf');
     Route::delete('/rekap-nilai/{id_sett_ujian}', [RekapNilaiController::class, 'hapusRekap'])->name('rekap.nilai.hapus');
 
     

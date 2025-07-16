@@ -56,19 +56,25 @@
                         <td>{{ $setting->token }}</td>
                         <td>
                             <div class="d-flex justify-content-center gap-1">
-                                <!-- Tombol Export -->
+                                <!-- Tombol Export Excel -->
                                 <a href="{{ route('rekap.nilai.export', $setting->id_sett_ujian) }}" class="btn btn-success btn-sm" title="Export Excel">
                                     <i class="fa fa-file-excel"></i>
                                 </a>
 
+                                <!-- Tombol Export PDF -->
+                                <a href="{{ route('rekap.nilai.exportPdf', $setting->id_sett_ujian) }}" class="btn btn-primary btn-sm" title="Export PDF">
+                                    <i class="fa fa-file-pdf"></i>
+                                </a>
+
                                 <!-- Tombol Hapus -->
-                                <form action="{{ route('rekap.nilai.hapus', $setting->id_sett_ujian) }}" method="POST">
+                                <form action="{{ route('rekap.nilai.hapus', $setting->id_sett_ujian) }}" method="POST" style="display:inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm" title="Hapus Rekap" onclick="return confirm('Yakin ingin menghapus semua rekap nilai untuk ujian ini?')">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </form>
+
                             </div>
                         </td>
                     </tr>

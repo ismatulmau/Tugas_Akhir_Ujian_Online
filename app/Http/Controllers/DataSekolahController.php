@@ -18,6 +18,7 @@ class DataSekolahController extends Controller
     {
         $request->validate([
             'nama_sekolah' => 'required',
+            'alamat' => 'required',
             'semester' => 'required',
             'tahun_pelajaran' => 'required',
             'nama_kepala_sekolah' => 'required',
@@ -33,6 +34,7 @@ class DataSekolahController extends Controller
         }
 
         $data->nama_sekolah = $request->nama_sekolah;
+        $data->alamat = $request->alamat;
         $data->semester = $request->semester;
         $data->tahun_pelajaran = $request->tahun_pelajaran;
         $data->nama_kepala_sekolah = $request->nama_kepala_sekolah;

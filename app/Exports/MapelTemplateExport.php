@@ -19,13 +19,13 @@ class MapelTemplateExport implements FromArray, WithHeadings, WithStyles, Should
     }
 
     public function headings(): array
-    {
-        return ['kode_mapel', 'nama_mapel', 'persen_uts', 'persen_uas','kkm'];
-    }
+{
+    return ['kode_mapel', 'nama_mapel', 'persen_uts', 'persen_uas', 'kkm', 'kelas'];
+}
 
     public function styles(Worksheet $sheet)
     {
-        $highestColumn = 'E'; // Kolom terakhir 
+        $highestColumn = 'F'; // Kolom terakhir 
 
         // Styling untuk header (baris pertama)
         $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
