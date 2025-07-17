@@ -6,18 +6,20 @@ use App\Models\SettingUjian;
 use App\Models\BankSoal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\DataSekolah;
 
 class SettingUjianController extends Controller
 {
     public function index()
 {
+    $dataSekolah = DataSekolah::first();
     $banksoals = BankSoal::with(['mapel', 'soals', 'settingUjian' => function ($query) {
         $query->where('status', 'aktif');
     }])
     ->where('status', 'aktif') // hanya bank soal aktif
     ->get();
 
-    return view('admin.status-tes.setting-ujian.index', compact('banksoals'));
+    return view('admin.status-tes.setting-ujian.index', compact('banksoals', 'dataSekolah'));
 }
 
 

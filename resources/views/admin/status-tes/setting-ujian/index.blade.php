@@ -92,18 +92,18 @@
             {{-- Status --}}
             <td>
               @if($setting)
-    @if($setting->status === 'aktif')
-        <button type="button" class="btn btn-sm btn-outline-success w-100" disabled>
-            Aktif
-        </button>
-    @else
-        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
-            Nonaktif
-        </button>
-    @endif
-@else
-    <span class="badge bg-danger">Belum disetting</span>
-@endif
+              @if($setting->status === 'aktif')
+              <button type="button" class="btn btn-sm btn-outline-success w-100" disabled>
+                Aktif
+              </button>
+              @else
+              <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>
+                Nonaktif
+              </button>
+              @endif
+              @else
+              <span class="badge bg-danger">Belum disetting</span>
+              @endif
 
             </td>
             {{-- Tombol Setting --}}
@@ -146,17 +146,14 @@
                     <div class="row g-3">
                       <div class="col-md-6">
                         <label class="form-label">Jenis Tes</label>
-                        <select name="jenis_tes" class="form-select" required>
-                          <option value="UTS" {{ $setting->jenis_tes == 'UTS' ? 'selected' : '' }}>UTS</option>
-                          <option value="UAS" {{ $setting->jenis_tes == 'UAS' ? 'selected' : '' }}>UAS</option>
-                        </select>
+                        <input type="text" name="jenis_tes" class="form-control form-control-sm"
+                          value="{{ $dataSekolah->jenis_tes ?? '-' }}" readonly>
                       </div>
+
                       <div class="col-md-6">
                         <label class="form-label">Semester</label>
-                        <select name="semester" class="form-select" required>
-                          <option value="1" {{ $setting->semester == 1 ? 'selected' : '' }}>Semester 1</option>
-                          <option value="2" {{ $setting->semester == 2 ? 'selected' : '' }}>Semester 2</option>
-                        </select>
+                        <input type="text" name="semester" class="form-control form-control-sm"
+                          value="{{ $dataSekolah->semester ?? '-' }}" readonly>
                       </div>
                       <div class="col-md-6">
                         <label class="form-label">Sesi Ujian</label>
@@ -220,17 +217,14 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Jenis Tes</label>
-              <select name="jenis_tes" class="form-select" required>
-                <option value="UTS">UTS</option>
-                <option value="UAS">UAS</option>
-              </select>
+              <input type="text" name="jenis_tes" class="form-control form-control-sm"
+                value="{{ $dataSekolah->jenis_tes ?? '-' }}" readonly>
             </div>
+
             <div class="col-md-6">
               <label class="form-label">Semester</label>
-              <select name="semester" class="form-select" required>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
-              </select>
+              <input type="text" name="semester" class="form-control form-control-sm"
+                value="{{ $dataSekolah->semester ?? '-' }}" readonly>
             </div>
             <div class="col-md-6">
               <label class="form-label">Sesi Ujian</label>
@@ -258,7 +252,6 @@
     </form>
   </div>
 </div>
-
 
 
 @endforeach

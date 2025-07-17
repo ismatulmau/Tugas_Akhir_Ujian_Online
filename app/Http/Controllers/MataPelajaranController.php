@@ -32,6 +32,12 @@ class MataPelajaranController extends Controller
         'kelas' => 'required|array|min:1',
     ], [
         'kelas_id.required' => 'Pilih minimal satu kelas.',
+        'kode_mapel.required' => 'Kode mapel harus diisi',
+            'kode_mapel.unique' => 'Kode mapel sudah ada',
+            'nama_mapel.required' => 'Nama mapel harus diisi',
+            'persen_uts.required' => '% UTS harus diisi',
+            'persen_uas.required' => '% UAS harus diisi',
+            'kkm.required' => 'KKM harus diisi',
     ]);
 
     DB::transaction(function () use ($request) {
