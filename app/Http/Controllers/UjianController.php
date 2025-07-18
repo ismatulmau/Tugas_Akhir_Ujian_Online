@@ -28,12 +28,10 @@ class UjianController extends Controller
                 ->with('error', 'Ujian ini tidak sesuai dengan jurusan, kelas atau tingkat Anda.');
         }
 
-        // ✅ Cek kesesuaian sesi ujian
         if ($ujian->sesi !== $siswa->sesi_ujian) {
             return redirect()->route('siswa.data-peserta')
                 ->with('error', 'Sesi ujian Anda tidak sesuai dengan sesi ujian yang dijadwalkan.');
         }
-
 
         if ($ujian->status !== 'aktif' || $ujian->bankSoal->status !== 'aktif') {
             return redirect()->route('siswa.data-peserta')
@@ -62,7 +60,6 @@ class UjianController extends Controller
             $soalIds = $soals->pluck('id_soal')->toArray();
             session([$sessionKey => $soalIds]);
         }
-
         return view('siswa.mulai-ujian', compact('ujian', 'soals'));
     }
 
@@ -79,8 +76,6 @@ class UjianController extends Controller
                 'jawaban' => $jawaban,
             ]);
         }
-
-        // Ambil setting ujian dan relasi bank soal untuk ambil jml_soal
         $settingUjian = \App\Models\SettingUjian::with('bankSoal')->findOrFail($id_sett_ujian);
 
         // Hitung jumlah jawaban benar
@@ -98,13 +93,11 @@ class UjianController extends Controller
 
         $score = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100, 2) : 0;
 
-        // Simpan data di session untuk ditampilkan di halaman konfirmasi
         session()->put('hasil_ujian', [
             'jumlah_benar' => $jumlahBenar,
             'total_soal' => $totalSoal,
             'score' => $score
         ]);
-
         // Hapus session verifikasi agar tidak bisa akses ulang
         session()->forget('ujian_terverifikasi');
 
